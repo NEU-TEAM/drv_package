@@ -1,0 +1,5 @@
+#IGNORE CERTAIN SUBFIX
+*.user
+#IGNORED FOLDERS
+build/
+.idea/
