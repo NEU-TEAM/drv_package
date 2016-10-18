@@ -15,6 +15,7 @@
 #include "search.h"
 #include "targetselect.h"
 #include "smoothservo.h"
+#include "segment.h"
 
 using namespace std;
 
@@ -41,6 +42,9 @@ int selectedNum_ = 0; // selected target number
 
 sensor_msgs::Image img_msg_;
 
+cv_bridge::CvImageConstPtr imagePtr_;
+cv_bridge::CvImageConstPtr depthPtr_;
+
 
 void imageCallback(const sensor_msgs::ImageConstPtr& image_msg)
 {
@@ -56,6 +60,22 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image_msg)
 				}
 
 		img_msg_ = *image_msg;
+		imagePtr_ = cv_bridge::toCvShare(image_msg, "bgr8");
+}
+
+void depthCallback(const sensor_msgs::ImageConstPtr& depth_msg)
+{
+		if (modeType_ != m_search)
+				{
+						return;
+				}
+
+		if (depth_msg->height != 480)
+				{
+						ROS_ERROR_THROTTLE(5,"Depth size is wrong.\n");
+						return;
+				}
+		depthPtr_ = cv_bridge::toCvShare(depth_msg);
 }
 
 void resetStatus()
@@ -74,6 +94,7 @@ int main(int argc, char **argv)
 		searchPubTarget_ = nh.advertise<drv_msgs::recognized_target>("search/recognized_target", 1, true);
 
 		ros::Subscriber sub_rgb = nh.subscribe("/rgb/image", 1, imageCallback);
+		ros::Subscriber sub_depth = nh.subscribe("/depth/image_raw", 1, depthCallback );
 
 		ros::ServiceClient client = nh.serviceClient<drv_msgs::recognize>("drv_recognize");
 
@@ -82,6 +103,8 @@ int main(int argc, char **argv)
 		Search sh;
 		TargetSelect ts;
 		SmoothServo ss;
+		Segment sg;
+//		Utilities ut;
 
 		while (ros::ok())
 				{
@@ -172,12 +195,16 @@ int main(int argc, char **argv)
 										// turn camera to the goal direction (according to the criteria above)
 //										ss.moveServoTo(delta_pitch + pitchAngle_, delta_yaw + yawAngle_);
 
+										// label the detected target with bounding area
+//										sg.segment(imagePtr_, depthPtr_);
+
 										// publish goal info for tracking
 										drv_msgs::recognized_target tgt;
 										tgt.header = srv.response.obj_info.header;
 										tgt.tgt_bbox_array = srv.response.obj_info.bbox_arrays[choosed_id];
 										tgt.label = srv.response.obj_info.labels[choosed_id];
 										searchPubTarget_.publish(tgt);
+										modeType_ = m_wander;
 								}
 
 						std_msgs::Int8 flag;

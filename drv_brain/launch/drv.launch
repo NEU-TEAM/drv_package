@@ -45,4 +45,8 @@
   <node name="drv_search" pkg="drv_search" type="drv_search" output="screen">
   </node>
 
+  <!-- initialize tracking client -->
+  <node name="drv_track_node" pkg="drv_track" type="drv_track_node">
+  </node>
+
 </launch>

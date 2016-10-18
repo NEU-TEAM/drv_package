@@ -18,11 +18,6 @@
 
 using namespace std;
 
-
-// global value
-int OFFSET = 101; // camera pitch offset
-double GH = 1.2; // camera base to robot base
-
 bool centralSwitch_ = true; // main switch
 
 // publish servo initial position
@@ -161,9 +156,6 @@ int main(int argc, char **argv)
 		ros::NodeHandle nh;
 		ros::NodeHandle pnh("~");
 
-		pnh.param("camera_pitch_offset", OFFSET, OFFSET);
-		pnh.param("ground_to_base_height", GH, GH);
-
 		servoInitPub_ = nh.advertise<std_msgs::UInt16MultiArray>("servo", 1, true);
 
 		// don't change the order without reason
@@ -198,7 +190,7 @@ int main(int argc, char **argv)
 						// target infomation preparation before mode selection
 						if (sub_tgt.getNumPublishers() == 0)
 								{
-										ROS_INFO_THROTTLE(11, "Target not set (no target publisher).\n");
+										ROS_INFO_THROTTLE(71, "Target not set (no target publisher).\n");
 										resetStatus();
 								}
 
