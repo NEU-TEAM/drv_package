@@ -1,4 +1,5 @@
 #include "goturn.h"
+#include <math.h>
 
 //minimum and maximum object area
 const int MIN_OBJECT_AREA = 40;
@@ -53,7 +54,8 @@ bool Goturn::goProcess(Mat img_in, Rect gt, Mat &img_out, Rect &detection, std::
 		Utilities::markImage(img_in, detection, img_out, mask_id);
 		waitKey(20);
 
-		if (detection.area() < MIN_OBJECT_AREA || detection.area() > MAX_OBJECT_AREA)
+		if (detection.area() < MIN_OBJECT_AREA ||  mask_id.size() < MIN_OBJECT_AREA ||
+						detection.area() > MAX_OBJECT_AREA || mask_id.size() > MAX_OBJECT_AREA)
 				{
 						return false;
 				}

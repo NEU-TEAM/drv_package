@@ -137,6 +137,10 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image_msg)
                     result.header = image_msg->header;
                     result.label = tgt_label_;
                     result.tgt_pixels.data = mask_id; // the datatype is uint 32 aka unsigned int
+                    result.tgt_bbox_array.data.push_back(roi.x);
+                    result.tgt_bbox_array.data.push_back(roi.y);
+                    result.tgt_bbox_array.data.push_back(roi.x + roi.width);
+                    result.tgt_bbox_array.data.push_back(roi.y + roi.height);
 
                     trackPubTarget_.publish(result);
                     return;

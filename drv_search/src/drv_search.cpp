@@ -37,6 +37,8 @@ int pitchAngle_ = 70;
 
 string targetLabel_;
 
+// global status control params
+bool servoInitialized_ = false;
 int searchResult_ = 0; // feedback, -1 indicate no result around, 0 indicate current no result, 1 has result
 int selectedNum_ = 0; // selected target number
 
@@ -80,6 +82,7 @@ void depthCallback(const sensor_msgs::ImageConstPtr& depth_msg)
 
 void resetStatus()
 {
+		servoInitialized_ = false;
 		searchResult_ = 0;
 		selectedNum_ = 0;
 }
@@ -98,7 +101,7 @@ int main(int argc, char **argv)
 
 		ros::ServiceClient client = nh.serviceClient<drv_msgs::recognize>("drv_recognize");
 
-		ROS_WARN("Search function initialized!\n");
+		ROS_INFO("Search function initialized!\n");
 
 		Search sh;
 		TargetSelect ts;
@@ -122,6 +125,13 @@ int main(int argc, char **argv)
 								{
 										resetStatus();
 										continue;
+								}
+
+						// get the servo pitch to standard pose for every search
+						if (!servoInitialized_)
+								{
+										ss.moveServoTo(70, yawAngle_);
+										servoInitialized_ = true;
 								}
 
 						if (ros::param::has("/target/label"))
@@ -175,7 +185,7 @@ int main(int argc, char **argv)
 										int pitch_angle = pitchAngle_;
 										int yaw_angle = yawAngle_;
 										bool has_next_pos = sh.getNextPosition(yaw_angle, pitch_angle);
-										ROS_WARN("Searching at angle: yaw = %d, pitch = %d.\n", yaw_angle, pitch_angle);
+										ROS_INFO("Searching at angle: yaw = %d, pitch = %d.\n", yaw_angle, pitch_angle);
 
 										if (!has_next_pos)
 												{
@@ -188,13 +198,6 @@ int main(int argc, char **argv)
 								}
 						else
 								{
-//										int delta_yaw = 0;
-//										int delta_pitch = 0;
-//										sh.getTargetPosition(bbox_arrays_, selectedNum_, delta_pitch, delta_yaw);
-
-										// turn camera to the goal direction (according to the criteria above)
-//										ss.moveServoTo(delta_pitch + pitchAngle_, delta_yaw + yawAngle_);
-
 										// label the detected target with bounding area
 //										sg.segment(imagePtr_, depthPtr_);
 
