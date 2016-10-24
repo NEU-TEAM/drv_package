@@ -20,4 +20,5 @@ Install openni_camera from binary is recommended.
 1. Run `roscore` first.
 2. Run launch file: `roslaunch drv_brain drv.launch` to launch the whole robot vision system.
 3. Set target by send rosmsg as follows: `rostopic pub /recognize/target drv_msgs/target_info '{label: {data: "bottle"}}'` , here 'bottle' refer to the target label and can be changed to 'chair', 'person' etc.
-4. After sending target msg, the system will automatically find the target in the scene. If some suspected objects were found, the system will call for user input to judge the result and decide whether continue searching the target or tracking the confirmed target.
+4. While sending target msg, the system will automatically run in *search mode* and find the target in the scene. If some suspected objects were found, the system will call for user input to judge the result and decide whether continue searching the target or tracking the confirmed target. If the target is confirmed, the system will run in *tracking mode* and grasp plan will be generated to manipulate the target.
+5. By canceling publishing the target msg, the system will run in *wander mode* and do nothing.
