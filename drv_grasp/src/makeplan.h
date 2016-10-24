@@ -1,6 +1,8 @@
 #ifndef MAKEPLAN_H
 #define MAKEPLAN_H
 
+#define USE_CENTER
+
 //STL
 #include <iostream>
 #include <math.h>

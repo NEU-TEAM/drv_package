@@ -141,6 +141,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image_msg)
                     result.tgt_bbox_array.data.push_back(roi.y);
                     result.tgt_bbox_array.data.push_back(roi.x + roi.width);
                     result.tgt_bbox_array.data.push_back(roi.y + roi.height);
+                    result.tgt_bbox_center.data.push_back(roi.x + roi.width / 2);
+                    result.tgt_bbox_center.data.push_back(roi.y + roi.height / 2);
 
                     trackPubTarget_.publish(result);
                     return;

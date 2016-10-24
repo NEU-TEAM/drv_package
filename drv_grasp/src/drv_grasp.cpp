@@ -61,7 +61,7 @@ float pd_ = 0.0f;
 uint32_t shape = visualization_msgs::Marker::ARROW;
 
 // transform frame
-string targetFrame_ = "map";
+string targetFrame_ = "camera_yaw_frame";
 string sourceFrame_ = "openni_rgb_optical_frame";
 geometry_msgs::TransformStamped transformStamped_;
 
@@ -136,13 +136,17 @@ void trackResultCallback(const drv_msgs::recognized_targetConstPtr & msg)
 				}
 
 		inliers_->indices.clear();
+
+#ifdef USE_CENTER
+		// directly use center as tgt location
+		inliers_->indices.push_back(msg->tgt_bbox_center.data[0] + msg->tgt_bbox_center.data[1] * 640);
+#else
+		// use mask as tgt area
 		for (size_t i = 0; i < msg->tgt_pixels.data.size(); i++)
 				{
 						inliers_->indices.push_back(msg->tgt_pixels.data[i]);
 				}
-
-//		int id = (msg->tgt_bbox_array.data[0] + msg->tgt_bbox_array.data[2])/2 + (msg->tgt_bbox_array.data[1] + msg->tgt_bbox_array.data[3])/2 * 480;
-//		inliers_->indices.push_back(id);
+#endif
 
 		//    pa_ = msg->support_plane.x;
 		//    pb_ = msg->support_plane.y;
@@ -165,7 +169,7 @@ void cloudCallback(const PointCloud::ConstPtr& msg)
 
 		if (inliers_->indices.empty())
 				{
-						ROS_WARN_THROTTLE(5, "Object to grasp has not been found.\n");
+						ROS_WARN_THROTTLE(5, "Object grasp plan has not been found.\n");
 						return;
 				}
 
@@ -185,7 +189,7 @@ void cloudCallback(const PointCloud::ConstPtr& msg)
 		doTransform(cloud_fo, cloud_ts, transformStamped_);
 
 		cloud_ts->header.stamp = msg->header.stamp;
-		cloud_ts->header.frame_id = "/map";
+		cloud_ts->header.frame_id = targetFrame_;
 		graspPubCloud_.publish(*cloud_ts);
 
 		pcl::PointXYZRGB avrPt;
@@ -195,7 +199,7 @@ void cloudCallback(const PointCloud::ConstPtr& msg)
 				{
 						visualization_msgs::Marker marker;
 						// Set the frame ID and timestamp.  See the TF tutorials for information on these.
-						marker.header.frame_id = "/map";
+						marker.header.frame_id = targetFrame_;
 						marker.header.stamp = pcl_conversions::fromPCL(msg->header.stamp);
 
 						// Set the namespace and id for this marker.  This serves to create a unique ID

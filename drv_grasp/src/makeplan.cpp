@@ -60,12 +60,12 @@ void MakePlan::removeNans(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_in, pcl::
       pcl::PassThrough<pcl::PointXYZRGB> ptfilter; // Initializing with true will allow us to extract the removed indices
       ptfilter.setInputCloud (cloud_filtered_nan);
       ptfilter.setFilterFieldName ("x");
-      ptfilter.setFilterLimits (-0.5, 0.5);
+      ptfilter.setFilterLimits (-0.2, 0.2);
       ptfilter.filter (indices_x->indices);
 
       ptfilter.setIndices (indices_x);
       ptfilter.setFilterFieldName ("y");
-      ptfilter.setFilterLimits (-0.5, 0.5);
+      ptfilter.setFilterLimits (-0.2, 0.2);
       ptfilter.filter (indices_xy->indices);
 
       ptfilter.setIndices (indices_xy);
@@ -76,8 +76,17 @@ void MakePlan::removeNans(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_in, pcl::
 
 bool MakePlan::process(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_in, float a, float b, float c, float d, pcl::PointXYZRGB &avrPt)
 {
+    if (!cloud_in->points.size())
+        {
+            return false;
+        }
+
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZRGB>);
+#ifdef USE_CENTER
+    cloud_filtered = cloud_in;
+#else
     removeOutliers(cloud_in, cloud_filtered);
+#endif
     bool success = getAveragePoint(cloud_filtered, avrPt);
     return success;
 }
