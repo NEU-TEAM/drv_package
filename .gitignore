@@ -1,5 +1,6 @@
 #IGNORE CERTAIN SUBFIX
 *.user
+*.pyc
 #IGNORED FOLDERS
 build/
 .idea/
