@@ -49,7 +49,11 @@ string param_running_mode = "/status/running_mode";
 bool hasGraspPlan_ = false;
 
 // target pointcloud index of image
+#ifdef USE_CENTER
+int idx_;
+#else
 pcl::PointIndices::Ptr inliers_(new pcl::PointIndices);
+#endif
 
 // support plane param
 float pa_ = 0.0f;
@@ -119,6 +123,22 @@ void doTransform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_in, pcl::PointClou
 				}
 }
 
+void doTransform(pcl::PointXYZRGB p_in, pcl::PointXYZRGB &p_out, const geometry_msgs::TransformStamped& t_in)
+{
+    Eigen::Transform<float,3,Eigen::Affine> t = Eigen::Translation3f(t_in.transform.translation.x, t_in.transform.translation.y,t_in.transform.translation.z)
+                                         * Eigen::Quaternion<float>(t_in.transform.rotation.w, t_in.transform.rotation.x, t_in.transform.rotation.y, t_in.transform.rotation.z);
+
+    Eigen::Vector3f point;
+
+		point = t * Eigen::Vector3f(p_in.x, p_in.y, p_in.z);
+		p_out.x = point.x();
+		p_out.y = point.y();
+		p_out.z = point.z();
+		p_out.r = p_in.r;
+		p_out.g = p_in.g;
+		p_out.b = p_in.b;
+}
+
 void normalize(float &pa, float &pb, float &pc, float scale)
 {
 		// make the vector (pa, pb, pc) length equal to scale (in m)
@@ -135,12 +155,11 @@ void trackResultCallback(const drv_msgs::recognized_targetConstPtr & msg)
 						return;
 				}
 
-		inliers_->indices.clear();
-
 #ifdef USE_CENTER
 		// directly use center as tgt location
-		inliers_->indices.push_back(msg->tgt_bbox_center.data[0] + msg->tgt_bbox_center.data[1] * 640);
+		idx_ = msg->tgt_bbox_center.data[0] + msg->tgt_bbox_center.data[1] * 640;
 #else
+		inliers_->indices.clear();
 		// use mask as tgt area
 		for (size_t i = 0; i < msg->tgt_pixels.data.size(); i++)
 				{
@@ -167,14 +186,26 @@ void cloudCallback(const PointCloud::ConstPtr& msg)
 						return;
 				}
 
+#ifdef USE_CENTER
+
+#else
 		if (inliers_->indices.empty())
 				{
 						ROS_WARN_THROTTLE(5, "Object grasp plan has not been found.\n");
 						return;
 				}
+#endif
 
-		MakePlan MP;
+    MakePlan MP;
+    pcl::PointXYZRGB avrPt;
 
+#ifdef USE_CENTER
+    pcl::PointXYZRGB p_in = msg->points[idx_];
+
+    doTransform(p_in, avrPt, transformStamped_);
+
+    hasGraspPlan_ = MP.smartOffset(avrPt, 0.02);
+#else
     PointCloud::Ptr cloud_in (new PointCloud());
     msgToCloud(msg, cloud_in);
 
@@ -192,8 +223,8 @@ void cloudCallback(const PointCloud::ConstPtr& msg)
 		cloud_ts->header.frame_id = targetFrame_;
 		graspPubCloud_.publish(*cloud_ts);
 
-		pcl::PointXYZRGB avrPt;
 		hasGraspPlan_ = MP.process(cloud_ts, pa_, pb_, pc_, pd_, avrPt);
+#endif
 
 		if (hasGraspPlan_)
 				{
