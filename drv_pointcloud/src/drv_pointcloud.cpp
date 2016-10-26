@@ -138,7 +138,7 @@ void depthCallback(
 
 int main(int argc, char **argv)
 {
-		ros::init(argc, argv, "publish_point_cloud");
+		ros::init(argc, argv, "drv_pointcloud");
 
 		ros::NodeHandle nh;
 		ros::NodeHandle pnh;

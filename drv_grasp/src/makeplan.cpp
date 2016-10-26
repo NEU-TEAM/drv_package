@@ -41,6 +41,8 @@ bool MakePlan::getAveragePoint(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_in, 
 
 bool MakePlan::smartOffset(pcl::PointXYZRGB &p_in, float off_val)
 {
+    if (fabs(p_in.x) < 0.1 || fabs(p_in.y) < 0.1 || fabs(p_in.z) < 0.1)
+        return false;
     float y_off = off_val / sqrt(1 + pow(p_in.x / p_in.y, 2)) * p_in.y / fabs(p_in.y);
     float x_off = p_in.x / p_in.y * y_off;
     p_in.x = p_in.x + x_off;

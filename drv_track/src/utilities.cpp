@@ -24,7 +24,7 @@ void Utilities::markImage(Mat img_in, Rect roi, Mat &img_out, std::vector<unsign
 		cvtColor(img_in, img_hsv, CV_BGR2HSV);
 		Point roi_center = Point(roi.x + roi.width / 2, roi.y + roi.height / 2);
 
-		floodFill(img_hsv, mask, roi_center, Scalar(255,255,255), 0, Scalar(25,25,25), Scalar(25,25,25), 4 | (255 << 8) | CV_FLOODFILL_FIXED_RANGE | CV_FLOODFILL_MASK_ONLY);
+		floodFill(img_hsv, mask, roi_center, Scalar(255,255,255), 0, Scalar(30,40,50), Scalar(30,40,50), 4 | (255 << 8) | CV_FLOODFILL_FIXED_RANGE | CV_FLOODFILL_MASK_ONLY);
 
 		Mat element(9, 9, CV_8U, Scalar(255));
 		Mat closed;
@@ -48,7 +48,7 @@ void Utilities::markImage(Mat img_in, Rect roi, Mat &img_out, std::vector<unsign
 		vector<vector<Point> > contours;
 		findContours(closed, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
-		drawContours(img_out, contours, 0, Scalar(232,228,53), 2);
+		drawContours(img_out, contours, 0, Scalar(196,0,225), 2);
 
 		drawObject(roi_center.x, roi_center.y, img_out);
 }

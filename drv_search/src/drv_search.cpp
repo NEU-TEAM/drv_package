@@ -130,7 +130,9 @@ int main(int argc, char **argv)
 						// get the servo pitch to standard pose for every search
 						if (!servoInitialized_)
 								{
+										ss.getCurrentServoAngle(pitchAngle_, yawAngle_);
 										ss.moveServoTo(70, yawAngle_);
+										pitchAngle_ = 70;
 										servoInitialized_ = true;
 								}
 

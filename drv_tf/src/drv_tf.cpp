@@ -161,7 +161,7 @@ void tfCallback(const std_msgs::HeaderConstPtr & msg)
 }
 
 int main(int argc, char** argv){
-    ros::init(argc, argv, "broadcast_camera_frame");
+    ros::init(argc, argv, "drv_tf");
     ros::NodeHandle nh;
     ros::NodeHandle pnh("~");
 

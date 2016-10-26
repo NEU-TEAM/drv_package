@@ -55,12 +55,6 @@ int idx_;
 pcl::PointIndices::Ptr inliers_(new pcl::PointIndices);
 #endif
 
-// support plane param
-float pa_ = 0.0f;
-float pb_ = 0.0f;
-float pc_ = 1.0f;
-float pd_ = 0.0f;
-
 // marker type
 uint32_t shape = visualization_msgs::Marker::ARROW;
 
@@ -139,15 +133,6 @@ void doTransform(pcl::PointXYZRGB p_in, pcl::PointXYZRGB &p_out, const geometry_
 		p_out.b = p_in.b;
 }
 
-void normalize(float &pa, float &pb, float &pc, float scale)
-{
-		// make the vector (pa, pb, pc) length equal to scale (in m)
-		float avr = pow(pa_, 2) + pow(pb_, 2) + pow(pc_, 2);
-		pa = pa_ / avr * scale;
-		pb = pb_ / avr * scale;
-		pc = pc_ / avr * scale;
-}
-
 void trackResultCallback(const drv_msgs::recognized_targetConstPtr & msg)
 {
 		if (modeType_ != m_track)
@@ -166,11 +151,6 @@ void trackResultCallback(const drv_msgs::recognized_targetConstPtr & msg)
 						inliers_->indices.push_back(msg->tgt_pixels.data[i]);
 				}
 #endif
-
-		//    pa_ = msg->support_plane.x;
-		//    pb_ = msg->support_plane.y;
-		//    pc_ = msg->support_plane.z;
-		//    pd_ = msg->support_plane.w;
 }
 
 void cloudCallback(const PointCloud::ConstPtr& msg)
@@ -241,9 +221,6 @@ void cloudCallback(const PointCloud::ConstPtr& msg)
 						marker.type = shape;
 						marker.action = visualization_msgs::Marker::ADD;
 
-						float la, lb, lc;
-						normalize(la, lb, lc, 0.15);
-
 						// Set the pose of the marker.  This is a full 6DOF pose relative to the frame/time specified in the header
 						marker.points.resize(2);
 
@@ -251,9 +228,9 @@ void cloudCallback(const PointCloud::ConstPtr& msg)
 						marker.points[0].y = avrPt.y;
 						marker.points[0].z = avrPt.z;
 
-						marker.points[1].x = avrPt.x + la;
-						marker.points[1].y = avrPt.y + lb;
-						marker.points[1].z = avrPt.z + lc;
+						marker.points[1].x = avrPt.x;
+						marker.points[1].y = avrPt.y;
+						marker.points[1].z = avrPt.z + 0.15;
 
 						// The point at index 0 is assumed to be the start point, and the point at index 1 is assumed to be the end.
 
@@ -279,7 +256,7 @@ void cloudCallback(const PointCloud::ConstPtr& msg)
 
 int main(int argc, char **argv)
 {
-		ros::init(argc, argv, "rva_grasp_plan");
+		ros::init(argc, argv, "drv_grasp");
 
 		ros::NodeHandle nh;
 

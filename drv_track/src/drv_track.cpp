@@ -61,6 +61,17 @@ string param_servo_yaw = "/status/servo/yaw";
 int pitch_ = 70;
 int yaw_ = 90;
 
+
+void publishServo(int pitch_angle, int yaw_angle)
+{
+    std_msgs::UInt16MultiArray array;
+    array.data.push_back(pitch_angle);
+    array.data.push_back(yaw_angle);
+    pitch_ = pitch_angle;
+    yaw_ = yaw_angle;
+    trackPubServo_.publish(array);
+}
+
 void servoCallback(const std_msgs::UInt16MultiArrayConstPtr &msg)
 {
     // this callback should always active
@@ -76,18 +87,7 @@ void resultCallback(const drv_msgs::recognized_targetConstPtr & msg)
     int max_x = msg->tgt_bbox_array.data[2];
     int max_y = msg->tgt_bbox_array.data[3];
 
-    // omit the background by narrow down the bounding box
-    detection_ = cv::Rect(min_x + 10, min_y + 10, max_x - min_x - 20, max_y - min_y - 20);
-}
-
-void publishServo(int pitch_angle, int yaw_angle)
-{
-    std_msgs::UInt16MultiArray array;
-    array.data.push_back(pitch_angle);
-    array.data.push_back(yaw_angle);
-    pitch_ = pitch_angle;
-    yaw_ = yaw_angle;
-    trackPubServo_.publish(array);
+    detection_ = cv::Rect(min_x, min_y, max_x - min_x, max_y - min_y);
 }
 
 void imageCallback(const sensor_msgs::ImageConstPtr& image_msg)
@@ -186,7 +186,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image_msg)
 
 int main(int argc, char **argv)
 {
-		ros::init(argc, argv, "rva_servo_track");
+		ros::init(argc, argv, "drv_track");
 
 		ros::NodeHandle nh;
 
