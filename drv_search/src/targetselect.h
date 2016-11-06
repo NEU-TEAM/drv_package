@@ -23,7 +23,9 @@ public:
 
 private:
     ros::NodeHandle nh;
-    image_transport::ImageTransport it_;
+    ros::NodeHandle pnh;
+    image_transport::ImageTransport rgb_it;
+
     ros::Publisher searchPubInfo_;
     image_transport::Publisher searchPubImage_; // publish labeled image for user judgement
     ros::ServiceClient client;

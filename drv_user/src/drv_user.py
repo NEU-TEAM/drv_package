@@ -7,7 +7,7 @@ import sys
 import rospy
 import cv2
 from std_msgs.msg import String
-from std_msgs.msg import UInt8
+from std_msgs.msg import UInt32
 from std_msgs.msg import UInt16MultiArray
 
 from drv_msgs.srv import *
@@ -15,7 +15,7 @@ from drv_msgs.msg import *
 from cv_bridge import CvBridge, CvBridgeError
 
 
-pubSR = rospy.Publisher('/comm/vision/select_request', UInt8, queue_size=1)
+pubSR = rospy.Publisher('/comm/vision/select_request', UInt32, queue_size=1)
 pubInfo = rospy.Publisher('/comm/vision/info', String, queue_size=1)
 
 
@@ -29,8 +29,12 @@ def handle_user_select(req):
     info_msg.data = info
     pubInfo.publish(info_msg)
 
+    # Make sure the last select is clear
+    if rospy.has_param('/comm/user_selected'):
+        rospy.set_param('/comm/user_selected', -1)
+
     # broadcast the request to select the target
-    sr_msg = UInt8()
+    sr_msg = UInt32()
     sr_msg.data = num
     pubSR.publish(sr_msg)
 

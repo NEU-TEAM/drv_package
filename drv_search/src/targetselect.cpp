@@ -2,10 +2,11 @@
 
 using namespace cv;
 
-TargetSelect::TargetSelect() : it_(nh)
+TargetSelect::TargetSelect() : rgb_it(nh)
 {
+		searchPubImage_ = rgb_it.advertise("search/labeled_image", 1);
+
 		searchPubInfo_ = nh.advertise<std_msgs::String>("/comm/vision/info", 1);
-		searchPubImage_ = it_.advertise("search/labeled_image", 1);
 
 		client = nh.serviceClient<drv_msgs::user_select>("drv_user");
 }
