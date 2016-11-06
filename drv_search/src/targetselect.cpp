@@ -4,6 +4,7 @@ using namespace cv;
 
 TargetSelect::TargetSelect() : it_(nh)
 {
+		searchPubInfo_ = nh.advertise<std_msgs::String>("/comm/vision/info", 1);
 		searchPubImage_ = it_.advertise("search/labeled_image", 1);
 
 		client = nh.serviceClient<drv_msgs::user_select>("drv_user");
@@ -61,27 +62,35 @@ int TargetSelect::callService(int num)
 {
 		drv_msgs::user_select srv;
 
-		srv.request.select_num = num;
-		int res = 0;
+		srv.request.select_num = num;// target number to be selected, start from 1
+		int result = 0;
 
 		if (client.call(srv))
 				{
-						res = srv.response.selected_id;
-						if (res == 0)
+						result = srv.response.selected_id;
+						if (result == 0)
 								{
-										ROS_INFO("Current scene confirmed have no target!\n");
+										pubInfo("You have comfirmed current scene have no target.");
 								}
 						else
 								{
-										ROS_INFO("The number %d object confirmed to be the target!\n", res);
+										if (result <= num && result >= 1)
+												{
+														ROS_INFO("The number %d object confirmed to be the target!\n", result);
+												}
+										else
+												{
+														result = 0;
+														ROS_ERROR("Invalid target number, the selectd number should between 1 to %d!\n", num);
+												}
 								}
 				}
 		else
 				{
-						ROS_ERROR("Failed to call service user select.");
+						ROS_ERROR("Failed to call user select service.");
 				}
 
-		return res;
+		return result;
 }
 
 void TargetSelect::paintTarget(cv::Mat &img, int id, int fc, std::vector<std_msgs::UInt16MultiArray> box_array)

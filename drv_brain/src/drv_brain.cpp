@@ -9,6 +9,7 @@
 #include <std_msgs/Float32.h>
 #include <std_msgs/Int8.h>
 #include <std_msgs/UInt16MultiArray.h>
+#include <std_msgs/Int32MultiArray.h>
 
 //Custom message
 #include <drv_msgs/target_info.h>
@@ -19,10 +20,6 @@
 using namespace std;
 
 bool centralSwitch_ = true; // main switch
-
-// publish servo initial position
-ros::Publisher servoInitPub_;
-bool servo_initialized_ = false;
 
 // target properties
 enum TargetType{t_null, t_onTable, t_onGround, t_onHead, t_onHand};
@@ -37,7 +34,13 @@ bool isTargetSet_ = false;
 //target status feedback
 bool foundTarget_ = false;
 
+// publish servo initial position
+ros::Publisher servoPub_;
+bool servo_initialized_ = false;
+
 // servo position angle
+int pitchAngle_ = 70;
+int yawAngle_ = 90;
 string param_servo_pitch = "/status/servo/pitch";
 string param_servo_yaw = "/status/servo/yaw";
 
@@ -52,31 +55,63 @@ int modeType_ = m_wander;
 int modeTypeTemp_ = -1;
 string modeName[3] = {"wandering", "searching", "tracking"};
 string param_running_mode = "/status/running_mode";
+ros::Publisher drvPubMode_; // vision system mode publisher
+
+//general infomation publisher
+ros::Publisher drvPubInfo_;
 
 
-void initializeServo(int pitch_angle, int yaw_angle)
+void pubServo(int pitch_angle, int yaw_angle)
 {
     std_msgs::UInt16MultiArray array;
     array.data.push_back(pitch_angle);
     array.data.push_back(yaw_angle);
-    servoInitPub_.publish(array);
+    servoPub_.publish(array);
+}
+
+void pubInfo(string info)
+{
+    ROS_INFO(info.c_str());
+    std_msgs::String msg;
+    msg.data = info;
+    drvPubInfo_.publish(msg);
+}
+
+void teleopCallback(const std_msgs::Int32MultiArrayConstPtr &msg)
+{
+    if (msg->data.empty())
+        return;
+
+    int pitch_temp = pitchAngle_ + msg->data[0];
+    if (pitch_temp < 40 || pitch_temp > 130)
+        return;
+    else
+        pitchAngle_ = pitch_temp;
+
+    int yaw_temp = yawAngle_ - msg->data[1];
+    if (yaw_temp < 0 || pitch_temp > 180)
+        return;
+    else
+        yawAngle_ = yaw_temp;
+
+    pubServo(pitchAngle_, yawAngle_);
 }
 
 void servoCallback(const std_msgs::UInt16MultiArrayConstPtr &msg)
 {
     // this callback should always active
-    int pitch = msg->data[0];
-    int yaw = msg->data[1];
+    pitchAngle_ = msg->data[0];
+    yawAngle_ = msg->data[1];
 
-    ros::param::set(param_servo_pitch, pitch);
-    ros::param::set(param_servo_yaw, yaw);
+    ros::param::set(param_servo_pitch, pitchAngle_);
+    ros::param::set(param_servo_yaw, yawAngle_);
 }
 
 void targetCallback(const drv_msgs::target_infoConstPtr &msg)
 {
     if (msg->label.data == " " || msg->label.data == "")
         {
-            ROS_INFO("Target canceled.\n");
+            pubInfo("Target canceled.");
             tgtType_ = t_null;
             targetLabel_ = "";
             isTargetSet_ = false;
@@ -84,7 +119,8 @@ void targetCallback(const drv_msgs::target_infoConstPtr &msg)
     else
         {
             targetLabel_ = msg->label.data;
-            ROS_INFO("Target set to be '%s'.\n", targetLabel_.c_str());
+            string s = "Target set to be '" + targetLabel_ + "'.";
+            pubInfo(s);
 
             isTargetSet_ = true;
 
@@ -99,19 +135,19 @@ void searchCallback(const std_msgs::Int8ConstPtr &msg)
         {
             if (msg->data == -1)
                 {
-                    ROS_INFO("Search around didn't get target, continue searching...\n");
+                    pubInfo("Search around didn't get target, continue searching...");
                     foundTarget_ = false;
                     ros::param::set(param_base_move, 1);
                 }
             else if (msg->data == 0)
                 {
-                    ROS_INFO("Currently didn't find target, continue searching...\n");
+                    pubInfo("Currently didn't find target, continue searching...");
                     foundTarget_ = false;
                     ros::param::set(param_base_move, -1);
                 }
             else
                 {
-                    ROS_INFO("Searching found the %s!\n", targetLabel_.c_str());
+                    pubInfo("Searching found the " + targetLabel_);
                     foundTarget_ = true;
                     ros::param::set(param_base_move, 0);
                 }
@@ -125,12 +161,12 @@ void trackCallback(const std_msgs::BoolConstPtr &msg)
         {
             if (!msg->data)
                 {
-                    ROS_INFO_THROTTLE(19,"Target lost!\n");
+                    ROS_INFO_THROTTLE(21, "Target lost!");
                     foundTarget_ = false;
                 }
             else
                 {
-                    ROS_INFO_THROTTLE(19,"Tracking the target...\n");
+                    ROS_INFO_THROTTLE(21, "Tracking the target...");
                     foundTarget_ = true;
                 }
         }
@@ -156,15 +192,18 @@ int main(int argc, char **argv)
 		ros::NodeHandle nh;
 		ros::NodeHandle pnh("~");
 
-		servoInitPub_ = nh.advertise<std_msgs::UInt16MultiArray>("servo", 1, true);
+		servoPub_ = nh.advertise<std_msgs::UInt16MultiArray>("servo", 1, true);
+		drvPubMode_ = nh.advertise<std_msgs::String>("/comm/vision/mode", 1);
+		drvPubInfo_ = nh.advertise<std_msgs::String>("/comm/vision/info", 1);
 
 		// don't change the order without reason
+		ros::Subscriber sub_servo_ctrl = nh.subscribe<std_msgs::Int32MultiArray>("/joy_teleop/servo", 2, teleopCallback);
 		ros::Subscriber sub_servo = nh.subscribe<std_msgs::UInt16MultiArray> ("servo", 1, servoCallback);
 		ros::Subscriber sub_tgt = nh.subscribe<drv_msgs::target_info>("recognize/target", 1, targetCallback);
 		ros::Subscriber sub_sh = nh.subscribe<std_msgs::Int8>("status/search/feedback", 1, searchCallback);
 		ros::Subscriber sub_tk = nh.subscribe<std_msgs::Bool>("status/track/feedback", 1, trackCallback);
 
-		ROS_WARN("Deep Robot Vision system initialized!\n");
+		pubInfo("Deep Robot Vision system initialized!");
 
 		while (ros::ok())
 				{
@@ -197,9 +236,9 @@ int main(int argc, char **argv)
 						// Initialize servo position
 						if (!servo_initialized_)
 								{
-										ROS_INFO("Servo initialized.\n");
-										initializeServo(70, 90);
+										pubServo(70, 90);
 										servo_initialized_ = true;
+										ROS_INFO("Servo initialized.\n");
 								}
 
 						// get status infomation
@@ -226,6 +265,9 @@ int main(int argc, char **argv)
 						ros::param::set(param_running_mode, modeType_);
 						if (modeType_ != modeTypeTemp_)
 								{
+										std_msgs::String mode_msg;
+										mode_msg.data = modeName[modeType_];
+										drvPubMode_.publish(mode_msg);
 										ROS_INFO("Current mode: %s.\n", modeName[modeType_].c_str());
 										modeTypeTemp_ = modeType_;
 								}

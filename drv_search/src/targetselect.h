@@ -24,6 +24,7 @@ public:
 private:
     ros::NodeHandle nh;
     image_transport::ImageTransport it_;
+    ros::Publisher searchPubInfo_;
     image_transport::Publisher searchPubImage_; // publish labeled image for user judgement
     ros::ServiceClient client;
 
@@ -35,6 +36,14 @@ private:
         std::stringstream ss;
         ss << number;
         return ss.str();
+    }
+
+    inline void pubInfo(std::string info)
+    {
+        ROS_INFO(info.c_str());
+        std_msgs::String msg;
+        msg.data = info;
+        searchPubInfo_.publish(msg);
     }
 };
 

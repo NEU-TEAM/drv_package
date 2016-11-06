@@ -5,6 +5,8 @@
 #include <std_msgs/Int8.h>
 #include <std_msgs/UInt16MultiArray.h>
 
+#include <sensor_msgs/CompressedImage.h>
+
 #include <drv_msgs/recognized_target.h>
 #include <drv_msgs/recognize.h>
 
@@ -15,7 +17,7 @@
 #include "search.h"
 #include "targetselect.h"
 #include "smoothservo.h"
-#include "segment.h"
+//#include "segment.h"
 
 using namespace std;
 
@@ -48,16 +50,10 @@ cv_bridge::CvImageConstPtr imagePtr_;
 cv_bridge::CvImageConstPtr depthPtr_;
 
 
-void imageCallback(const sensor_msgs::ImageConstPtr& image_msg)
+void imageCallback(const sensor_msgs::ImageConstPtr & image_msg)
 {
 		if (modeType_ != m_search)
 				{
-						return;
-				}
-
-		if (image_msg->height != 480)
-				{
-						ROS_ERROR_THROTTLE(5,"Image size is wrong.\n");
 						return;
 				}
 
@@ -92,12 +88,21 @@ int main(int argc, char **argv)
 		ros::init(argc, argv, "drv_search");
 
 		ros::NodeHandle nh;
+		ros::NodeHandle pnh;
+		ros::NodeHandle rgb_nh(nh, "rgb");
+//		ros::NodeHandle depth_nh(nh, "depth");
+		ros::NodeHandle rgb_pnh(pnh, "rgb");
+//		ros::NodeHandle depth_pnh(pnh, "depth");
+		image_transport::ImageTransport it_rgb_sub(rgb_nh);
+//		image_transport::ImageTransport depth_it(depth_nh);
+		image_transport::TransportHints hints_rgb("compressed", ros::TransportHints(), rgb_pnh);
 
 		searchPubStatus_ = nh.advertise<std_msgs::Int8>("status/search/feedback", 1);
 		searchPubTarget_ = nh.advertise<drv_msgs::recognized_target>("search/recognized_target", 1, true);
 
-		ros::Subscriber sub_rgb = nh.subscribe("/rgb/image", 1, imageCallback);
-		ros::Subscriber sub_depth = nh.subscribe("/depth/image_raw", 1, depthCallback );
+//		ros::Subscriber sub_rgb = nh.subscribe("/rgb/image/compressed", 1, imageCallback);
+		image_transport::Subscriber sub_rgb = it_rgb_sub.subscribe("/rgb/image", 1, imageCallback, hints_rgb);
+//		ros::Subscriber sub_depth = nh.subscribe("/depth/image_raw", 1, depthCallback );
 
 		ros::ServiceClient client = nh.serviceClient<drv_msgs::recognize>("drv_recognize");
 
@@ -106,7 +111,7 @@ int main(int argc, char **argv)
 		Search sh;
 		TargetSelect ts;
 		SmoothServo ss;
-		Segment sg;
+//		Segment sg;
 //		Utilities ut;
 
 		while (ros::ok())

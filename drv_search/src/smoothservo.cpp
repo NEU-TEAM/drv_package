@@ -45,8 +45,8 @@ bool SmoothServo::moveServoTo(int pitch, int yaw)
 
 bool SmoothServo::smooth(std::vector<std::vector<int> > &path, int p, int y)
 {
-		//  20 < p < 120, 0 <= y <=180
-		if (p < 20 || p > 120 || y < 0 || y > 180)
+		//  0 < p < 150, 0 <= y <=180
+		if (p < 0 || p > 150 || y < 0 || y > 180)
 				return false;
 
 		int mp = (p - pitch_temp) / step;
@@ -70,6 +70,7 @@ bool SmoothServo::smooth(std::vector<std::vector<int> > &path, int p, int y)
 				}
 		yv.push_back(y);
 
+		// path: pitch_value: p1,p2,p3...; yaw_value: y1,y2,y3...
 		path.push_back(pv);
 		path.push_back(yv);
 
