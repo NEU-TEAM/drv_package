@@ -26,7 +26,7 @@ def handle_user_select(req):
     info = "Please choose the one you want, if no target, enter 0."
     print info
     info_msg = String()
-    info_msg.data = info
+    info_msg.data = "CHOOSE"
     pubInfo.publish(info_msg)
 
     # Make sure the last select is clear
