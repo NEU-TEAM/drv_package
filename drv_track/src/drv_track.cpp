@@ -88,6 +88,7 @@ void resultCallback(const drv_msgs::recognized_targetConstPtr & msg)
     int max_y = msg->tgt_bbox_array.data[3];
 
     detection_ = cv::Rect(min_x, min_y, max_x - min_x, max_y - min_y);
+    GO.tracker_initialized_ = false;
 }
 
 void imageCallback(const sensor_msgs::ImageConstPtr& image_msg)
@@ -109,6 +110,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image_msg)
 						ROS_WARN("Target area in image is %d, too small to be tracked.\n", detection_.area());
 
 						GO.tracker_initialized_ = false;
+						return;
 				}
 
 		std::vector<unsigned int> mask_id; // store object pixels id in image

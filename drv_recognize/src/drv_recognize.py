@@ -14,7 +14,10 @@ from drv_msgs.msg import recognized_objects
 from drv_msgs.srv import *
 from cv_bridge import CvBridge, CvBridgeError
 
+
 def handle_recognize(req):
+    rsp = recognizeResponse()
+
     bridge = CvBridge()
     try:
         cv_image = bridge.imgmsg_to_cv2(req.img_in, "bgr8")
@@ -30,7 +33,6 @@ def handle_recognize(req):
     result = ps.process(cv_image)
 
     ro_msg = recognized_objects()
-
 
     for i in result:
         bbox = i[0]
@@ -57,17 +59,18 @@ def handle_recognize(req):
 
     ro_msg.header = req.img_in.header
 
-    rsp = recognizeResponse()
     rsp.img_out = bridge.cv2_to_imgmsg(cv_image, "bgr8")
     rsp.obj_info = ro_msg
 
     return rsp
+
 
 def recognize_server():
     rospy.init_node('recognize_server')
     s = rospy.Service('drv_recognize', recognize, handle_recognize)
     print "Ready to recognize."
     rospy.spin()
+
 
 if __name__ == "__main__":
     recognize_server()

@@ -14,18 +14,23 @@
 //Custom message
 #include <drv_msgs/target_info.h>
 
-
 #include <stdio.h>
+
+#include "androidlistener.h"
+#include "targetlistener.h"
 
 using namespace std;
 
 bool centralSwitch_ = true; // main switch
 
 // target properties
+bool targetSetTemp = false;
+string param_target_label = "/vision/target/label";
 enum TargetType{t_null, t_onTable, t_onGround, t_onHead, t_onHand};
 string targetTypeName[5] = {"in air", "on the table", "on the ground", "on the face", "in the hand"};
 int tgtType_ = t_null;
 string param_target_type = "/status/target/type";
+
 
 // target status control
 string targetLabel_ = "";
@@ -77,7 +82,7 @@ void pubInfo(string info)
     drvPubInfo_.publish(msg);
 }
 
-void teleopCallback(const std_msgs::Int32MultiArrayConstPtr &msg)
+void teleOpCallback(const std_msgs::Int32MultiArrayConstPtr &msg)
 {
     if (msg->data.empty())
         return;
@@ -107,27 +112,31 @@ void servoCallback(const std_msgs::UInt16MultiArrayConstPtr &msg)
     ros::param::set(param_servo_yaw, yawAngle_);
 }
 
-void targetCallback(const drv_msgs::target_infoConstPtr &msg)
-{
-    if (msg->label.data == " " || msg->label.data == "")
-        {
-            pubInfo("Target canceled.");
-            tgtType_ = t_null;
-            targetLabel_ = "";
-            isTargetSet_ = false;
-        }
-    else
-        {
-            targetLabel_ = msg->label.data;
-            string s = "Target set to be '" + targetLabel_ + "'.";
-            pubInfo(s);
 
-            isTargetSet_ = true;
+// TODO: change this to param
+//void targetCallback(const drv_msgs::target_infoConstPtr &msg)
+//{
+//    if (msg->label.data == " " || msg->label.data == "")
+//        {
+//            pubInfo("Target canceled.");
+//            tgtType_ = t_null;
+//            targetLabel_ = "";
+//            isTargetSet_ = false;
+//            ros::param::set("/status/target/is_set", false);
+//        }
+//    else
+//        {
+//            targetLabel_ = msg->label.data;
+//            string s = "Target set to be '" + targetLabel_ + "'.";
+//            pubInfo(s);
 
-            ros::param::set(param_target_type, tgtType_);
-            ros::param::set("/target/label", targetLabel_);
-        }
-}
+//            isTargetSet_ = true;
+//            ros::param::set("/status/target/is_set", true);
+
+//            ros::param::set(param_target_type, tgtType_);
+//            ros::param::set("/target/label", targetLabel_);
+//        }
+//}
 
 void searchCallback(const std_msgs::Int8ConstPtr &msg)
 {
@@ -197,11 +206,14 @@ int main(int argc, char **argv)
 		drvPubInfo_ = nh.advertise<std_msgs::String>("/comm/vision/info", 1);
 
 		// don't change the order without reason
-		ros::Subscriber sub_servo_ctrl = nh.subscribe<std_msgs::Int32MultiArray>("/joy_teleop/servo", 2, teleopCallback);
+		ros::Subscriber sub_servo_ctrl = nh.subscribe<std_msgs::Int32MultiArray>("/joy_teleop/servo", 2, teleOpCallback);
 		ros::Subscriber sub_servo = nh.subscribe<std_msgs::UInt16MultiArray> ("servo", 1, servoCallback);
-		ros::Subscriber sub_tgt = nh.subscribe<drv_msgs::target_info>("recognize/target", 1, targetCallback);
+//		ros::Subscriber sub_tgt = nh.subscribe<drv_msgs::target_info>("recognize/target", 1, targetCallback);
 		ros::Subscriber sub_sh = nh.subscribe<std_msgs::Int8>("status/search/feedback", 1, searchCallback);
 		ros::Subscriber sub_tk = nh.subscribe<std_msgs::Bool>("status/track/feedback", 1, trackCallback);
+
+		AndroidListener al;
+		TargetListener tl;
 
 		pubInfo("Deep Robot Vision system initialized!");
 
@@ -226,13 +238,6 @@ int main(int argc, char **argv)
 										continue;
 								}
 
-						// target infomation preparation before mode selection
-						if (sub_tgt.getNumPublishers() == 0)
-								{
-										ROS_INFO_THROTTLE(71, "Target not set (no target publisher).\n");
-										resetStatus();
-								}
-
 						// Initialize servo position
 						if (!servo_initialized_)
 								{
@@ -241,8 +246,29 @@ int main(int argc, char **argv)
 										ROS_INFO("Servo initialized.\n");
 								}
 
-						// get status infomation
+						// get feedback from search and track to determine is target found
 						ros::spinOnce();
+
+						// get target if params were set
+						tl.getTargetStatus(isTargetSet_, targetLabel_);
+						ros::param::set(param_target_label, targetLabel_);
+						if (isTargetSet_ != targetSetTemp)
+								{
+										if (isTargetSet_)
+												{
+														string s = "Target set to be '" + targetLabel_ + "'.";
+														pubInfo(s);
+												}
+										else
+												{
+														pubInfo("Target canceled.");
+														resetStatus();
+												}
+										targetSetTemp = isTargetSet_;
+								}
+
+						// if user select target on cellphone, publish the target
+						al.publishOnceIfTargetSelected(isTargetSet_, foundTarget_);
 
 						//mode selection, NOTICE that modeType_ should only be set by central control
 						if (isTargetSet_)

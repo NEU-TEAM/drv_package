@@ -21,6 +21,8 @@
 
 using namespace std;
 
+string param_target_label = "/vision/target/label";
+
 ros::Publisher servoPubSearch_; // publish servo angle rotated for search
 ros::Publisher searchPubStatus_;
 ros::Publisher searchPubTarget_; // publish target info to track function
@@ -141,8 +143,8 @@ int main(int argc, char **argv)
 										servoInitialized_ = true;
 								}
 
-						if (ros::param::has("/target/label"))
-								ros::param::get("/target/label", targetLabel_);
+						if (ros::param::has(param_target_label))
+								ros::param::get(param_target_label, targetLabel_);
 
 						ros::spinOnce();
 
@@ -209,11 +211,14 @@ int main(int argc, char **argv)
 //										sg.segment(imagePtr_, depthPtr_);
 
 										// publish goal info for tracking
-										drv_msgs::recognized_target tgt;
-										tgt.header = srv.response.obj_info.header;
-										tgt.tgt_bbox_array = srv.response.obj_info.bbox_arrays[choosed_id];
-										tgt.label = srv.response.obj_info.labels[choosed_id];
-										searchPubTarget_.publish(tgt);
+										if (srv.response.obj_info.bbox_arrays.size() > choosed_id)
+												{
+														drv_msgs::recognized_target tgt;
+														tgt.header = srv.response.obj_info.header;
+														tgt.tgt_bbox_array = srv.response.obj_info.bbox_arrays[choosed_id];
+														tgt.label = srv.response.obj_info.labels[choosed_id];
+														searchPubTarget_.publish(tgt);
+												}
 										modeType_ = m_wander;
 								}
 
