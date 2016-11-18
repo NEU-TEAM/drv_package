@@ -32,7 +32,7 @@
   <param name="use_gui" value="true"/> 
   <node name="rviz" pkg="rviz" type="rviz" >
   </node>
-
+  
   <!-- initialize tracking function -->
   <node name="drv_track_node" pkg="drv_track" type="drv_track_node">
   </node>

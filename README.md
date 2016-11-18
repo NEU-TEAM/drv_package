@@ -8,13 +8,15 @@ We use Caffe to implement our tracking and searching method. More specifically, 
 This package is not included in the drv_package, you need to get it from <https://github.com/rbgirshick/py-faster-rcnn>, and change the 8th line in file 'process.py' according to where you install the py-faster-rcnn.
 ###1.3 rosserial
 Please refer the site <http://wiki.ros.org/rosserial>. We use **rosserial_arduino** to communicate with one Arduino Uno board and an ADXL345 3-axis accelerator. The control board is used to control 2 servos, one for pitch the RGBD-camera (ASUS Xtion Pro) and the other for yaw the RGBD-camera. The accelerator is used to get the pitch and yaw angle of the camera. 
-###1.4 openni_camera
-Install openni_camera from binary is recommended.
+###1.4 openni_camera or astra_camera
+Install openni_camera from binary is recommended. Currently astra_camera is not supported, but you can use it by remapping the topics.
+###1.5 GOTURN
+While GOTURN itself is not necessary to be compiled to run this program, we still need the trained model tracker.caffemodel to be put in /home/aicrobo/GOTURN/nets/models/pretrained_model, if your route to the model is different from this one, you need modify the route declaration in drv_track.cpp
 
 ##2. Installation
-1. In your ROS package path (check your environment variable ROS_PACKAGE_PATH) clone this repository:
+1. clone this repository into catkin_ws/src:
 `git clone https://github.com/NEU-TEAM/drv_package.git`
-2. Build all by running `catkin_make` in your workspace root.
+2. Build all by running `catkin_make` in /catkin_ws.
 
 ##3. Usage
 1. Run `roscore` first.
