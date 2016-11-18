@@ -6,7 +6,7 @@ const int MIN_OBJECT_AREA = 400;
 const int MAX_OBJECT_AREA =  160000;
 
 Goturn::Goturn(string test_proto, string caffe_model, int gpu_id,
-                                const bool do_train, const bool show_output)
+               const bool do_train, const bool show_output)
     : regressor_(test_proto, caffe_model, gpu_id, do_train),
       tracker_(show_output)
 {
@@ -21,8 +21,8 @@ void Goturn::goInit (Mat img, Rect gt)
     bbox_gt.x2_ = gt.x + gt.width;
     bbox_gt.y2_ = gt.y + gt.height;
 
-		tracker_.Init(img, bbox_gt, &regressor_);
-		tracker_initialized_ = true;
+    tracker_.Init(img, bbox_gt, &regressor_);
+    tracker_initialized_ = true;
 }
 
 Rect Goturn::goTrack(Mat img)
@@ -41,26 +41,26 @@ Rect Goturn::goTrack(Mat img)
 
 bool Goturn::goProcess(Mat img_in, Rect gt, Mat &img_out, Rect &detection, std::vector<unsigned int> &mask_id)
 {
-		if (tracker_initialized_)
-				{
-						detection = goTrack(img_in);
-				}
-		else
-				{
-						goInit(img_in, gt);
-						detection = gt;
-				}
+    if (tracker_initialized_)
+    {
+        detection = goTrack(img_in);
+    }
+    else
+    {
+        goInit(img_in, gt);
+        detection = gt;
+    }
 
-		Utilities::markImage(img_in, detection, img_out, mask_id);
-		waitKey(10);
+    Utilities::markImage(img_in, detection, img_out, mask_id);
+    waitKey(10);
 
-		if (detection.area() < MIN_OBJECT_AREA ||  mask_id.size() < MIN_OBJECT_AREA ||
-						detection.area() > MAX_OBJECT_AREA || mask_id.size() > MAX_OBJECT_AREA)
-				{
-						return false;
-				}
-		else
-				return true;
+    if (detection.area() < MIN_OBJECT_AREA ||  mask_id.size() < MIN_OBJECT_AREA ||
+            detection.area() > MAX_OBJECT_AREA || mask_id.size() > MAX_OBJECT_AREA)
+    {
+        return false;
+    }
+    else
+        return true;
 }
 
 

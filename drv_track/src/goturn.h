@@ -23,7 +23,7 @@ class Goturn
 {
 public:
     Goturn(string test_proto, string caffe_model, int gpu_id,
-                   const bool do_train, const bool show_output);
+           const bool do_train, const bool show_output);
 
     bool tracker_initialized_;
 

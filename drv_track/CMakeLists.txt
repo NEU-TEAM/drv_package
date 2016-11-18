@@ -4,8 +4,6 @@ project(drv_track)
 #Comment this if don't want debug
 set(CMAKE_BUILD_TYPE Debug)
 
-#set(Caffe_DIR "/home/aicrobo/caffe/build/install")
-
 find_package(Caffe REQUIRED)
 include_directories(${Caffe_INCLUDE_DIRS})
 add_definitions(${Caffe_DEFINITIONS})    # ex. -DCPU_ONLY
