@@ -181,10 +181,12 @@ void cloudCallback(const PointCloud::ConstPtr& msg)
 
 #ifdef USE_CENTER
     pcl::PointXYZRGB p_in = msg->points[idx_];
-
-    doTransform(p_in, avrPt, transformStamped_);
-
-    hasGraspPlan_ = MP.smartOffset(avrPt, 0.02);
+    if (isnan(p_in.x) || isnan(p_in.y) || isnan(p_in.z))
+        hasGraspPlan_ = false;
+    else {
+            doTransform(p_in, avrPt, transformStamped_);
+            hasGraspPlan_ = MP.smartOffset(avrPt, 0.02);
+        }
 #else
     PointCloud::Ptr cloud_in (new PointCloud());
     msgToCloud(msg, cloud_in);
@@ -230,7 +232,7 @@ void cloudCallback(const PointCloud::ConstPtr& msg)
 
 						marker.points[1].x = avrPt.x;
 						marker.points[1].y = avrPt.y;
-						marker.points[1].z = avrPt.z + 0.15;
+						marker.points[1].z = avrPt.z + 0.15; // arrow height = 0.15m
 
 						// The point at index 0 is assumed to be the start point, and the point at index 1 is assumed to be the end.
 

@@ -183,7 +183,7 @@ int main(int argc, char **argv)
 								}
 						else
 								{
-										ROS_ERROR("Failed to call service recognize");
+										ROS_ERROR("Failed to call recognize service.");
 										searchResult_ = 0;
 								}
 

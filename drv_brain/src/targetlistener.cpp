@@ -5,8 +5,8 @@ TargetListener::TargetListener()
     isTargetSet_ = false;
     targetLabel_ = "";
 
-    param_target_set =   "/comm/target/is_set";
-    param_target_label = "/comm/target/label";
+    param_target_set =   "/comm/control/target/is_set";
+    param_target_label = "/comm/control/target/label";
 }
 
 void TargetListener::getTargetStatus(bool &is_tgt_set, string &tgt_label)

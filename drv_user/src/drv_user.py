@@ -3,16 +3,11 @@
 import roslib
 
 roslib.load_manifest('drv_user')
-import sys
 import rospy
-import cv2
 from std_msgs.msg import String
 from std_msgs.msg import UInt32
-from std_msgs.msg import UInt16MultiArray
 
 from drv_msgs.srv import *
-from drv_msgs.msg import *
-from cv_bridge import CvBridge, CvBridgeError
 
 
 pubSR = rospy.Publisher('/comm/vision/select_request', UInt32, queue_size=1)
@@ -20,6 +15,7 @@ pubInfo = rospy.Publisher('/comm/vision/info', String, queue_size=1)
 
 
 def handle_user_select(req):
+    param_control_user_selected = '/comm/control/user_selected'
     num = req.select_num
     selected = -1
 
@@ -30,8 +26,8 @@ def handle_user_select(req):
     pubInfo.publish(info_msg)
 
     # Make sure the last select is clear
-    if rospy.has_param('/comm/user_selected'):
-        rospy.set_param('/comm/user_selected', -1)
+    if rospy.has_param(param_control_user_selected):
+        rospy.set_param(param_control_user_selected, -1)
 
     # broadcast the request to select the target
     sr_msg = UInt32()
@@ -39,8 +35,8 @@ def handle_user_select(req):
     pubSR.publish(sr_msg)
 
     while selected < 0:
-        if rospy.has_param('/comm/user_selected'):
-            selected = rospy.get_param('/comm/user_selected')
+        if rospy.has_param(param_control_user_selected):
+            selected = rospy.get_param(param_control_user_selected)
         if num >= selected >= 0:
             break
         else:
@@ -49,7 +45,7 @@ def handle_user_select(req):
     rsp = user_selectResponse()
     rsp.selected_id = int(selected)
 
-    rospy.set_param('/comm/user_selected', -1)
+    rospy.set_param(param_control_user_selected, -1)
 
     return rsp
 

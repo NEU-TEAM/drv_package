@@ -21,6 +21,17 @@
 
 using namespace std;
 
+/* global params */
+// feedback
+string param_vision_feedback_mode = "/comm/feedback/vision/status/mode"; // 0:wandering, 1:searching, 2:tracking
+string param_vision_feedback_search = "/comm/feedback/vision/status/search"; // 0:no search, 1:found, -1:current not found. -2:around not found
+string param_vision_feedback_track = "/comm/feedback/vision/status/track"; // 0:no track, 1:tracking, -1:lost
+string param_vision_feedback_grasp = "/comm/feedback/vision/status/grasp"; // 0:no grasp, 1:found location, -1:can't find location
+// vision shared
+string param_vision_shared_switch = "/comm/shared/vision/switch"; // true:switch on to execute tasks, false:switch off and run in wander mode
+// robot movement control param
+string param_base_move = "/comm/shared/movement/base/move"; // 0: free move, 1: should go to next position, -1: hold
+
 bool centralSwitch_ = true; // main switch
 
 // target properties
@@ -48,11 +59,6 @@ int pitchAngle_ = 70;
 int yawAngle_ = 90;
 string param_servo_pitch = "/status/servo/pitch";
 string param_servo_yaw = "/status/servo/yaw";
-
-// robot movement control param
-// 0: free move, 1: should go to next position, -1: hold
-string param_base_move = "/status/base/move";
-
 
 // mode control params
 enum ModeType{m_wander, m_search, m_track};
@@ -112,32 +118,6 @@ void servoCallback(const std_msgs::UInt16MultiArrayConstPtr &msg)
     ros::param::set(param_servo_yaw, yawAngle_);
 }
 
-
-// TODO: change this to param
-//void targetCallback(const drv_msgs::target_infoConstPtr &msg)
-//{
-//    if (msg->label.data == " " || msg->label.data == "")
-//        {
-//            pubInfo("Target canceled.");
-//            tgtType_ = t_null;
-//            targetLabel_ = "";
-//            isTargetSet_ = false;
-//            ros::param::set("/status/target/is_set", false);
-//        }
-//    else
-//        {
-//            targetLabel_ = msg->label.data;
-//            string s = "Target set to be '" + targetLabel_ + "'.";
-//            pubInfo(s);
-
-//            isTargetSet_ = true;
-//            ros::param::set("/status/target/is_set", true);
-
-//            ros::param::set(param_target_type, tgtType_);
-//            ros::param::set("/target/label", targetLabel_);
-//        }
-//}
-
 void searchCallback(const std_msgs::Int8ConstPtr &msg)
 {
     if (modeType_ == m_search)
@@ -146,11 +126,13 @@ void searchCallback(const std_msgs::Int8ConstPtr &msg)
                 {
                     pubInfo("Search around didn't get target, continue searching...");
                     foundTarget_ = false;
+                    ros::param::set(param_vision_feedback_search, -2);
                     ros::param::set(param_base_move, 1);
                 }
             else if (msg->data == 0)
                 {
                     pubInfo("Currently didn't find target, continue searching...");
+                    ros::param::set(param_vision_feedback_search, -1);
                     foundTarget_ = false;
                     ros::param::set(param_base_move, -1);
                 }
@@ -158,6 +140,7 @@ void searchCallback(const std_msgs::Int8ConstPtr &msg)
                 {
                     pubInfo("Searching found the " + targetLabel_);
                     foundTarget_ = true;
+                    ros::param::set(param_vision_feedback_search, 1);
                     ros::param::set(param_base_move, 0);
                 }
         }
@@ -172,11 +155,30 @@ void trackCallback(const std_msgs::BoolConstPtr &msg)
                 {
                     ROS_INFO_THROTTLE(21, "Target lost!");
                     foundTarget_ = false;
+                    ros::param::set(param_vision_feedback_track, -1);
                 }
             else
                 {
                     ROS_INFO_THROTTLE(21, "Tracking the target...");
                     foundTarget_ = true;
+                    ros::param::set(param_vision_feedback_track, 1);
+                }
+        }
+}
+
+void graspCallback(const std_msgs::BoolConstPtr &msg)
+{
+    if (modeType_ == m_track)
+        {
+            if (!msg->data)
+                {
+                    ROS_INFO_THROTTLE(21, "Failed to locate the target.");
+                    ros::param::set(param_vision_feedback_grasp, -1);
+                }
+            else
+                {
+                    ROS_INFO_THROTTLE(21, "Target location confirmed.");
+                    ros::param::set(param_vision_feedback_grasp, 1);
                 }
         }
 }
@@ -184,6 +186,11 @@ void trackCallback(const std_msgs::BoolConstPtr &msg)
 
 void resetStatus()
 {
+		// reset global params
+		ros::param::set(param_vision_feedback_search, 0);
+		ros::param::set(param_vision_feedback_track, 0);
+		ros::param::set(param_vision_feedback_grasp, 0);
+
 		tgtType_ = t_null;
 		targetLabel_ = "";
 
@@ -211,19 +218,25 @@ int main(int argc, char **argv)
 //		ros::Subscriber sub_tgt = nh.subscribe<drv_msgs::target_info>("recognize/target", 1, targetCallback);
 		ros::Subscriber sub_sh = nh.subscribe<std_msgs::Int8>("status/search/feedback", 1, searchCallback);
 		ros::Subscriber sub_tk = nh.subscribe<std_msgs::Bool>("status/track/feedback", 1, trackCallback);
+		ros::Subscriber sub_gp = nh.subscribe<std_msgs::Bool>("status/grasp/feedback", 1, graspCallback);
 
 		AndroidListener al;
 		TargetListener tl;
 
 		pubInfo("Deep Robot Vision system initialized!");
 
+		// initialize global params
+		ros::param::set(param_vision_feedback_search, 0);
+		ros::param::set(param_vision_feedback_track, 0);
+		ros::param::set(param_vision_feedback_grasp, 0);
+
 		while (ros::ok())
 				{
 						// main on/off control
-						if (ros::param::has("/status/central/switch"))
+						if (ros::param::has(param_vision_shared_switch))
 								{
 										bool temp = true;
-										ros::param::get("/status/central/switch", temp);
+										ros::param::get(param_vision_shared_switch, temp);
 										if (temp)
 												{
 														ROS_WARN_COND(!centralSwitch_, "Central switch is ON.\n");
