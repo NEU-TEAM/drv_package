@@ -5,16 +5,16 @@ Deep Robot Vision system for NEU household service robot
 ###1.1 Caffe
 We use Caffe to implement our tracking and searching method. More specifically, the tracking method (i.e. GOTURN) use original Caffe, while the searching method (i.e. Faster RCNN) use customized Caffe. To install original Caffe, refer <http://caffe.berkeleyvision.org/installation.html> and follow the 'CMake Build' instruction, as for the caffe-faster-rcnn, refer 1.2.
 ###1.2 py-faster-rcnn
-This package is not included in the drv_package, you need to get it from <https://github.com/rbgirshick/py-faster-rcnn>, and change the 8th line in file 'process.py' according to where you install the py-faster-rcnn.
+This package is not included in the drv_package, you need to get it from <https://github.com/rbgirshick/py-faster-rcnn>, and change the 8th line in file 'process.py' according to where you installed the py-faster-rcnn.
 ###1.3 rosserial
-Please refer the site <http://wiki.ros.org/rosserial>. We use **rosserial_arduino** to communicate with one Arduino Uno board and an ADXL345 3-axis accelerator. The control board is used to control 2 servos, one for pitch the RGBD-camera (ASUS Xtion Pro) and the other for yaw the RGBD-camera. The accelerator is used to get the pitch and yaw angle of the camera. 
+Please refer the site <http://wiki.ros.org/rosserial>. We use **rosserial_arduino** to communicate with one Arduino Uno board and an ADXL345 3-axis accelerator. The control board is used to control 2 servos, one for pitch the RGBD-camera (ASUS Xtion Pro) and the other for yaw the RGBD-camera. The accelerator is used to get the pitch and yaw angles of the camera. 
 ###1.4 openni_camera or astra_camera
 Install openni_camera from binary is recommended. Currently astra_camera is not supported, but you can use it by remapping the topics.
 ###1.5 GOTURN
-While GOTURN itself is not necessary to be compiled to run this program, we still need the trained model tracker.caffemodel to be put in /home/aicrobo/GOTURN/nets/models/pretrained_model, if your route to the model is different from this one, you need modify the route declaration in drv_track.cpp
+While GOTURN itself is not necessary to be compiled to run this program, we still need the trained model tracker.caffemodel to be put in /home/aicrobo/GOTURN/nets/models/pretrained_model, if your route to the caffemodel is different from this one, you need to modify the route declarations in **drv_track.cpp**.
 
 ##2. Installation
-1. clone this repository into catkin_ws/src:
+1. Clone this repository into catkin_ws/src:
 `git clone https://github.com/NEU-TEAM/drv_package.git`
 2. Build all by running `catkin_make` in /catkin_ws.
 
