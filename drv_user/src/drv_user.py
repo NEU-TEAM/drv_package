@@ -10,12 +10,12 @@ from std_msgs.msg import UInt32
 from drv_msgs.srv import *
 
 
-pubSR = rospy.Publisher('/comm/vision/select_request', UInt32, queue_size=1)
-pubInfo = rospy.Publisher('/comm/vision/info', String, queue_size=1)
+pubSR = rospy.Publisher('/comm/msg/vision/select_request', UInt32, queue_size=1)
+pubInfo = rospy.Publisher('/comm/msg/vision/info', String, queue_size=1)
 
 
 def handle_user_select(req):
-    param_control_user_selected = '/comm/control/user_selected'
+    param_control_user_selected = '/comm/param/control/target/selected'
     num = req.select_num
     selected = -1
 

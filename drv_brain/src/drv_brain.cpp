@@ -23,14 +23,14 @@ using namespace std;
 
 /* global params */
 // feedback
-string param_vision_feedback_mode = "/comm/feedback/vision/status/mode"; // 0:wandering, 1:searching, 2:tracking
-string param_vision_feedback_search = "/comm/feedback/vision/status/search"; // 0:no search, 1:found, -1:current not found. -2:around not found
-string param_vision_feedback_track = "/comm/feedback/vision/status/track"; // 0:no track, 1:tracking, -1:lost
-string param_vision_feedback_grasp = "/comm/feedback/vision/status/grasp"; // 0:no grasp, 1:found location, -1:can't find location
+string param_vision_feedback_mode = "/comm/param/feedback/vision/mode"; // 0:wandering, 1:searching, 2:tracking
+string param_vision_feedback_search = "/comm/param/feedback/vision/search"; // 0:no search, 1:found, -1:current not found. -2:around not found
+string param_vision_feedback_track = "/comm/param/feedback/vision/track"; // 0:no track, 1:tracking, -1:lost
+string param_vision_feedback_grasp = "/comm/param/feedback/vision/grasp"; // 0:no grasp, 1:found location, -1:can't find location
 // vision shared
-string param_vision_shared_switch = "/comm/shared/vision/switch"; // true:switch on to execute tasks, false:switch off and run in wander mode
+string param_vision_shared_switch = "/comm/param/shared/vision/switch"; // true:switch on to execute tasks, false:switch off and run in wander mode
 // robot movement control param
-string param_base_move = "/comm/shared/movement/base/move"; // 0: free move, 1: should go to next position, -1: hold
+string param_base_move = "/comm/param/shared/movement/base/move"; // 0: free move, 1: should go to next position, -1: hold
 
 bool centralSwitch_ = true; // main switch
 
@@ -209,8 +209,8 @@ int main(int argc, char **argv)
 		ros::NodeHandle pnh("~");
 
 		servoPub_ = nh.advertise<std_msgs::UInt16MultiArray>("servo", 1, true);
-		drvPubMode_ = nh.advertise<std_msgs::String>("/comm/vision/mode", 1);
-		drvPubInfo_ = nh.advertise<std_msgs::String>("/comm/vision/info", 1);
+		drvPubMode_ = nh.advertise<std_msgs::String>("/comm/msg/vision/mode", 1); // used for mode info output
+		drvPubInfo_ = nh.advertise<std_msgs::String>("/comm/msg/vision/info", 1);
 
 		// don't change the order without reason
 		ros::Subscriber sub_servo_ctrl = nh.subscribe<std_msgs::Int32MultiArray>("/joy_teleop/servo", 2, teleOpCallback);
