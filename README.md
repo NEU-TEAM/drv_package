@@ -11,7 +11,9 @@ Please refer the site <http://wiki.ros.org/rosserial>. We use **rosserial_arduin
 ###1.4 openni_camera or astra_camera
 Install openni_camera from binary is recommended. The astra_camera is also supported.
 ###1.5 GOTURN
-While GOTURN itself is not necessary to be compiled to run this program, we still need the trained model tracker.caffemodel to be put in /home/aicrobo/GOTURN/nets/models/pretrained_model, if your route to the caffemodel is different from this one, you need to modify the route declarations in **drv_track.cpp**.
+While GOTURN itself is not necessary to be compiled to run this program, we still need the trained model tracker.caffemodel to be put in /home/aicrobo/GOTURN/nets/models/pretrained_model. You can get GOTURN form <https://github.com/davheld/GOTURN>. If your route to the caffemodel is different from above, you need to modify the route declarations in **drv_track.cpp** which is in the folder /drv_package/drv_track/.
+###1.6 Hardware
+To run searching and tracking moudle smoothly, a workstation whose GPU has at least 2GB of RAM is necessary. This program has been tested on multiple machine configurations, in which the host computer's CPUs run at frequencies exceeding 2.4 GHz.
 
 ##2. Installation
 1. Clone this repository into catkin_ws/src:
@@ -21,6 +23,7 @@ While GOTURN itself is not necessary to be compiled to run this program, we stil
 ##3. Usage
 1. Run `roscore` first.
 2. Run launch file: `roslaunch drv_brain drv.launch` to launch the whole robot vision system. If you use astra_camera, run `roslaunch drv_brain drv_astra.launch` instead. The only difference between the two launch files is the camera_node being launched.
-3. Set target by set rosparam as follows: `rosparam set /comm/control/target/label bottle`, `rosparam set /comm/control/target/is_set true` , here 'bottle' refer to the target label and can be changed to 'chair', 'person' etc.
-4. With target set, the system will automatically run in *search mode* and find the target in the scene. If some suspected objects were found, the system will call for user input to judge the result and decide whether continue searching the target or tracking the confirmed target. If the target is confirmed, the system will run in *tracking mode* and location of the target in space will be generated for manipulating the target.
-5. By setting the target *is_set* param to be *false*, the system will run in *wander mode* and do nothing.
+3. If you use DRV on multiple machines, `roslaunch drv_brain drv_host.launch` on host machine (which is on the robot), and `roslaunch drv_brain drv_workstation.launch` on the workstation controlling the robot and processing the data remotely.
+4. Set target by set rosparam as follows: `rosparam set /comm/control/target/label bottle`, `rosparam set /comm/control/target/is_set true` , here 'bottle' refer to the target label and can be changed to 'chair', 'person' etc. Notice that these functions can be easily realized with JARVIS <https://github.com/NEU-TEAM/JARVIS>, which is a Android app for controlling the NEU household robot.
+5. With target set, the system will automatically run in *search mode* and find the target in the scene. If some suspected objects were found, the system will call for user input to judge the result and decide whether continue searching the target or tracking the confirmed target. If the target is confirmed, the system will run in *tracking mode* and location of the target in space will be generated for manipulating the target.
+6. By setting the target *is_set* param to be *false*, the system will run in *wander mode* and do nothing.
