@@ -20,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
  add_service_files(
    FILES
    recognize.srv
+   face_recognize.srv
    user_select.srv
  )
 
