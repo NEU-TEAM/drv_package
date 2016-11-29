@@ -12,4 +12,7 @@
   <node name="openni2_camera_node" pkg="openni2_camera" type="openni2_camera_node">
   </node>
 
+  <node name="base_move" pkg="base_move" type="base_move">
+  </node>
+
 </launch>

@@ -33,18 +33,6 @@
   <node name="rviz" pkg="rviz" type="rviz" >
   </node>
 
-  <!-- initialize recognition service -->
-  <node name="drv_recognize" pkg="drv_recognize" type="drv_recognize.py">
-  </node>
-
-  <!-- initialize user selection service -->
-  <node name="drv_user" pkg="drv_user" type="drv_user.py" output="screen">
-  </node>
-
-  <!-- initialize search client -->
-  <node name="drv_search" pkg="drv_search" type="drv_search" output="screen">
-  </node>
-
   <!-- initialize tracking function -->
   <node name="drv_track_node" pkg="drv_track" type="drv_track_node">
   </node>
