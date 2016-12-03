@@ -28,7 +28,7 @@ int regAddress = 0x32;
 int y, z;
 
 std_msgs::Float32 pitch_msg;
-ros::Publisher pub_pitch("/camera_pitch", &pitch_msg);
+ros::Publisher pub_pitch("camera_pitch", &pitch_msg);
 
 void servo_cb( const std_msgs::UInt16MultiArray&  cmd_msg)
 {

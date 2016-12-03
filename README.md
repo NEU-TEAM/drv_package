@@ -28,3 +28,5 @@ To run searching and tracking modules smoothly, a workstation with least 2GB of 
 5. With target set, the system will automatically run in *search mode* and find the target in the scene. If some suspected objects were found, the system will call for user input to judge the result and decide whether continue searching the target or tracking the confirmed target. If the target is confirmed, the system will run in *tracking mode* and location of the target in space will be generated for manipulating the target.
 6. By setting the target *is_set* param to be *false*, the system will run in *wander mode* and do nothing.
 ## 5. Trouble Shooting
+1. If custom message issue occured when running catkin_make, run `catkin_make --pkg drv_msgs --force-cmake` first to make the msg header files needed, and then run `catkin_make`.
+2. If you use astra camera and find the pointcloud edge is not quite well, first make sure you get offical source code from <https://github.com/orbbec/ros_astra_camera.git>, clone it to your catkin_ws and try `catkin_make --pkg astra_camera -DFILTER=ON`.

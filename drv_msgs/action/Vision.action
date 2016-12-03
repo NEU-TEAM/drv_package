@@ -1,0 +1,16 @@
+#goal definition
+uint8 mode           # 0: not active, 1: object location, 2: facial recognition (not support for now)
+string target_label  # The target label in English. If not set, the mode 1 will not be execute
+string target_color  # [Optional] parameter for target color, example: blue, orange, green...
+---
+#result definition
+geometry_msgs/PoseStamped target_pose  # Return target pose if mode=1
+std_msgs/UInt8MultiArray ids           # Return faces' id if mode=2, 0 for unknown
+---
+#feedback
+uint8 state         # Feedback working state, 0:not working (wandering), 1:working, 2:error occured
+uint8 state_detail  # Feedback if mode=1
+                    # 0:wandering
+                    # 1:search found, 2:current not found. 3:search around not found
+                    # 4:tracking, 5:track lost
+                    # 6:found location, 7:can't find location

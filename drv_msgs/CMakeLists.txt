@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(drv_msgs)
 
 find_package(catkin REQUIRED COMPONENTS
+  actionlib_msgs
   geometry_msgs
   message_generation
   roscpp
@@ -24,8 +25,14 @@ find_package(catkin REQUIRED COMPONENTS
    user_select.srv
  )
 
+ add_action_files(
+  DIRECTORY action
+  FILES Vision.action
+)
+
  generate_messages(
    DEPENDENCIES
+   actionlib_msgs
    geometry_msgs
    sensor_msgs
    std_msgs
@@ -33,6 +40,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package(
   CATKIN_DEPENDS
+  actionlib_msgs
   message_runtime
   geometry_msgs
   sensor_msgs

@@ -3,8 +3,6 @@ project(drv_tf)
 
 aux_source_directory(./src SRC_LIST)
 
-#Comment this if don't want debug
-#set(CMAKE_BUILD_TYPE Debug)
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
     message(STATUS "No build type selected, default to ${CMAKE_BUILD_TYPE}")
@@ -25,7 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(PCL 1.7 REQUIRED)
 
-#add dynamic reconfigure api
+#add dynamic reconfigure API
 generate_dynamic_reconfigure_options(cfg/tf.cfg)
 
 catkin_package()

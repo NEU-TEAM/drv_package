@@ -5,7 +5,7 @@ SmoothServo::SmoothServo()
     pitch_temp = 70;
     yaw_temp = 90;
     step = 1; // minium step for single move
-    servoPubSearch_ = nh.advertise<std_msgs::UInt16MultiArray>("servo", 1);
+    servoPubSearch_ = nh.advertise<std_msgs::UInt16MultiArray>("/vision/servo", 1);
 }
 
 void SmoothServo::getCurrentServoAngle(int pitch, int yaw)

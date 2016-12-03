@@ -143,10 +143,6 @@ int main(int argc, char **argv)
 		ros::NodeHandle nh;
 		ros::NodeHandle pnh;
 
-		// the first string is the variable name used by roslaunch, followed by variable value defined by roslaunch, and the default value
-		pnh.param("pointcloud_min_depth", min_depth_, min_depth_);
-		pnh.param("pointcloud_max_depth", max_depth_, max_depth_);
-
 		// set up dynamic reconfigure callback
 		dynamic_reconfigure::Server<drv_pointcloud::pointcloudConfig> server;
 		dynamic_reconfigure::Server<drv_pointcloud::pointcloudConfig>::CallbackType f;

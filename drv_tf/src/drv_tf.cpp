@@ -52,8 +52,10 @@ std::string cameraLinkFrameID_ = "/camera_link_frame";
 std::string cameraPitchFrameID_ = "/camera_pitch_frame"; // y along the axis of pitch servo to the right, x toward front, z up, orign projection at the diameter of rotation plate
 std::string cameraYawFrameID_ = "/camera_yaw_frame"; // y to the right, x to the front, z up, orign at the bottom of support
 std::string baseLinkFrameID_ = "/base_link";
-std::string pointCloudSourceTopic_ = "/point_cloud";
+std::string cameraOpticalFrameID_ = "/openni_rgb_optical_frame";
+std::string visionNameSpaceID_ = "/vision";
 
+std::string pointCloudSourceTopic_ = "/point_cloud";
 
 void configCallback(drv_tf::tfConfig &config, uint32_t level)
 {
@@ -86,7 +88,7 @@ void tfCallback(const std_msgs::HeaderConstPtr & msg)
 
 		transformStamped1.header.stamp = msg->stamp;
 		transformStamped1.header.frame_id = cameraLinkFrameID_;
-		transformStamped1.child_frame_id = "/openni_rgb_optical_frame";
+		transformStamped1.child_frame_id = cameraOpticalFrameID_;
 
 		transformStamped1.transform.translation.x = dx_optic_to_link;
 		transformStamped1.transform.translation.y = dy_optic_to_link;
@@ -166,9 +168,9 @@ int main(int argc, char** argv){
     ros::NodeHandle pnh("~");
 
 		// the first string is the variable name used by roslaunch, followed by variable value defined by roslaunch, and the default value
-		pnh.param("camera_pitch_offset", pitch_offset_, pitch_offset_);
-		pnh.param("ground_to_base_height", dz_yaw_to_base_, dz_yaw_to_base_);
-		pnh.param("base_link_frame_id", baseLinkFrameID_, baseLinkFrameID_);
+		pnh.param("/drv_tf/base_link_frame_id", baseLinkFrameID_, baseLinkFrameID_);
+		pnh.param("/drv_tf/camera_frame_id", cameraOpticalFrameID_, cameraOpticalFrameID_);
+		pnh.param("/drv_tf/vision_namespace_id", visionNameSpaceID_, visionNameSpaceID_);
 
 		// set up dynamic reconfigure callback
 		dynamic_reconfigure::Server<drv_tf::tfConfig> server;
@@ -177,8 +179,8 @@ int main(int argc, char** argv){
 		f = boost::bind(&configCallback, _1, _2);
 		server.setCallback(f);
 
-		ros::Subscriber sub_acc = nh.subscribe("/camera_pitch", 3, pitchCallback);
-		ros::Subscriber sub_yaw = nh.subscribe<std_msgs::UInt16MultiArray> ("servo", 1, yawCallback);
+		ros::Subscriber sub_acc = nh.subscribe(visionNameSpaceID_ + "/camera_pitch", 3, pitchCallback);
+		ros::Subscriber sub_yaw = nh.subscribe<std_msgs::UInt16MultiArray> (visionNameSpaceID_ + "/servo", 1, yawCallback);
 		ros::Subscriber sub = nh.subscribe<std_msgs::Header>("point_cloud/header", 3, tfCallback);
 
 		 ROS_INFO("TF initialized.\n");

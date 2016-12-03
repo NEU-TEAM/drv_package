@@ -208,13 +208,13 @@ int main(int argc, char **argv)
 		ros::NodeHandle nh;
 		ros::NodeHandle pnh("~");
 
-		servoPub_ = nh.advertise<std_msgs::UInt16MultiArray>("servo", 1, true);
+		servoPub_ = nh.advertise<std_msgs::UInt16MultiArray>("/vision/servo", 1, true);
 		drvPubMode_ = nh.advertise<std_msgs::String>("/comm/msg/vision/mode", 1); // used for mode info output
 		drvPubInfo_ = nh.advertise<std_msgs::String>("/comm/msg/vision/info", 1);
 
 		// don't change the order without reason
 		ros::Subscriber sub_servo_ctrl = nh.subscribe<std_msgs::Int32MultiArray>("/joy_teleop/servo", 2, teleOpCallback);
-		ros::Subscriber sub_servo = nh.subscribe<std_msgs::UInt16MultiArray> ("servo", 1, servoCallback);
+		ros::Subscriber sub_servo = nh.subscribe<std_msgs::UInt16MultiArray> ("/vision/servo", 1, servoCallback);
 //		ros::Subscriber sub_tgt = nh.subscribe<drv_msgs::target_info>("recognize/target", 1, targetCallback);
 		ros::Subscriber sub_sh = nh.subscribe<std_msgs::Int8>("status/search/feedback", 1, searchCallback);
 		ros::Subscriber sub_tk = nh.subscribe<std_msgs::Bool>("status/track/feedback", 1, trackCallback);

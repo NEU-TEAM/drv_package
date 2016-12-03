@@ -203,13 +203,13 @@ int main(int argc, char **argv)
     image_transport::TransportHints hints_rgb("compressed", ros::TransportHints(), rgb_pnh);
 
     trackPubImage_ = it_rgb_pub.advertise("track/image", 1);
-    trackPubServo_ = nh.advertise<std_msgs::UInt16MultiArray>("servo", 1);
+    trackPubServo_ = nh.advertise<std_msgs::UInt16MultiArray>("/vision/servo", 1);
     trackPubStatus_ = nh.advertise<std_msgs::Bool>("status/track/feedback", 1);
     trackPubTarget_ = nh.advertise<drv_msgs::recognized_target>("track/recognized_target" , 1);
 
     ros::Subscriber sub_res = nh.subscribe<drv_msgs::recognized_target>("search/recognized_target", 1, resultCallback);
     image_transport::Subscriber sub_rgb = it_rgb_sub.subscribe("/rgb/image", 1, imageCallback, hints_rgb);
-    ros::Subscriber sub_s = nh.subscribe<std_msgs::UInt16MultiArray> ("servo", 1, servoCallback);
+    ros::Subscriber sub_s = nh.subscribe<std_msgs::UInt16MultiArray> ("/vision/servo", 1, servoCallback);
 
     if (ros::param::has(param_servo_pitch))
         ros::param::get(param_servo_pitch, pitch_);

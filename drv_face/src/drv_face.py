@@ -17,7 +17,7 @@ def handle_face_recognize(req):
     rsp = face_recognizeResponse()
 
     bridge = CvBridge()
-    ro_msg = UInt8MultiArray()
+    fl_msg = UInt8MultiArray()
     try:
         for im in req.images_in:
             cv_image = bridge.imgmsg_to_cv2(im, "bgr8")
@@ -29,10 +29,10 @@ def handle_face_recognize(req):
                 name_id_msg.data = result[0] + 1  # known face id start with 1
             else:
                 name_id_msg.data = 0  # unknown face has id 0
-            ro_msg.data.append(name_id_msg)
+            fl_msg.data.append(name_id_msg)
 
         # establish a dict to find the name refereed by the id
-        rsp.face_label_ids = ro_msg
+        rsp.face_label_ids = fl_msg
         return rsp
 
     except CvBridgeError as e:
@@ -43,6 +43,7 @@ def handle_face_recognize(req):
 def face_recognize_server():
     rospy.init_node('face_recognize_server')
     s = rospy.Service('drv_face', face_recognize, handle_face_recognize)
+
     print "Ready to recognize."
     rospy.spin()
 
