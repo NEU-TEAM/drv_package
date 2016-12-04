@@ -43,9 +43,12 @@ float dy_yaw_to_base = 0;
 double dz_yaw_to_base_ = 1.1;
 
 
-float pitchtemp_ = 0.0;
-int tol_ = 2; // the tolerance (degree) about camera shaking
+float imuPitchTemp_ = 0.0;
+int tol_ = 1; // the tolerance (degree) about camera shaking
 int pitch_offset_ = 101; // offset for pitch which was got from IMU
+
+int servoPitchTemp_ = 0; // judge if the servo pitch value is changing
+bool pitchChanged_ = false; // if pitch is not changed, make camera steady
 
 // roslaunch param
 std::string cameraLinkFrameID_ = "/camera_link_frame";
@@ -62,20 +65,30 @@ void configCallback(drv_tf::tfConfig &config, uint32_t level)
     ROS_INFO("Reconfigure Request: offset: %d, height: %f.\n", config.camera_pitch_offset_cfg, config.ground_to_base_height_cfg);
     pitch_offset_ = config.camera_pitch_offset_cfg;
     dz_yaw_to_base_ = config.ground_to_base_height_cfg;
+    pitchChanged_ = true;
 }
 
-void pitchCallback(const std_msgs::Float32ConstPtr & msg)
+void servoCallback(const std_msgs::UInt16MultiArrayConstPtr &msg)
 {
-    pitch_ = msg->data - pitch_offset_; // notice that pitch_ < 0
-    if (fabs(pitch_ - pitchtemp_) > tol_ )
-        pitchtemp_ = pitch_;
-    pitch_ = pitchtemp_  * 0.01745; // / 180.0 * 3.14159
-}
-
-void yawCallback(const std_msgs::UInt16MultiArrayConstPtr &msg)
-{
+    int servo_pitch = (msg->data[0]);
+    if (servoPitchTemp_ != servo_pitch)
+        {
+            pitchChanged_ = true;
+            servoPitchTemp_ = servo_pitch;
+        }
     // this callback should always active
     yaw_ = (msg->data[1] - 90) * 0.01745;
+}
+
+void imuCallback(const std_msgs::Float32ConstPtr & msg)
+{
+    pitch_ = msg->data - pitch_offset_; // notice that pitch_ < 0
+    if (fabs(pitch_ - imuPitchTemp_) > tol_  &&  pitchChanged_)
+        {
+            imuPitchTemp_ = pitch_;
+            pitchChanged_ = false; // reset the state each loop, cause this will be true if it has changed.
+        }
+    pitch_ = imuPitchTemp_  * 0.01745; // 3.14159 / 180.0
 }
 
 void tfCallback(const std_msgs::HeaderConstPtr & msg)
@@ -179,8 +192,8 @@ int main(int argc, char** argv){
 		f = boost::bind(&configCallback, _1, _2);
 		server.setCallback(f);
 
-		ros::Subscriber sub_acc = nh.subscribe(visionNameSpaceID_ + "/camera_pitch", 3, pitchCallback);
-		ros::Subscriber sub_yaw = nh.subscribe<std_msgs::UInt16MultiArray> (visionNameSpaceID_ + "/servo", 1, yawCallback);
+		ros::Subscriber sub_yaw = nh.subscribe<std_msgs::UInt16MultiArray> (visionNameSpaceID_ + "/servo", 1, servoCallback);
+		ros::Subscriber sub_acc = nh.subscribe(visionNameSpaceID_ + "/camera_pitch", 3, imuCallback);
 		ros::Subscriber sub = nh.subscribe<std_msgs::Header>("point_cloud/header", 3, tfCallback);
 
 		 ROS_INFO("TF initialized.\n");

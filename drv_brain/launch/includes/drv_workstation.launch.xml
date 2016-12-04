@@ -18,10 +18,6 @@
     <remap from="/vision_namespace" to="/$(arg vision_namespace_id)"/>
   </node>
 
-  <!-- initialize central control -->
-  <node name="drv_brain" pkg="drv_brain" type="drv_brain" output="screen">
-  </node>
-
   <!-- initialize visualization -->
   <param name="use_gui" value="true"/> 
   <node name="rviz" pkg="rviz" type="rviz" >

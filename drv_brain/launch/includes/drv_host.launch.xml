@@ -13,4 +13,8 @@
   <node name="$(arg camera_type)_node" pkg="$(arg camera_type)" type="$(arg camera_type)_node">
   </node>
 
+  <!-- initialize central control -->
+  <node name="drv_brain" pkg="drv_brain" type="drv_brain" output="screen">
+  </node>
+
 </launch>

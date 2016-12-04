@@ -5,7 +5,6 @@
   </include>
 
   <include file="$(find drv_brain)/launch/includes/drv_workstation.launch.xml">
-  	<arg name="vision_namespace_id" default="$(arg vision_namespace)"/>
   </include>
 
 </launch>
