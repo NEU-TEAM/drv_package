@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(drv_face)
+project(drv_face_service)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -11,13 +11,10 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   image_geometry
   image_transport
-  pcl_ros
   roscpp
   rospy
   sensor_msgs
   std_msgs
-  tf2
-  tf2_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -111,8 +108,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES drv_face
-#  CATKIN_DEPENDS cv_bridge drv_msgs dynamic_reconfigure geometry_msgs image_geometry image_transport pcl_ros roscpp rospy sensor_msgs std_msgs tf2 tf2_ros
+#  LIBRARIES drv_face_service
+#  CATKIN_DEPENDS cv_bridge drv_msgs dynamic_reconfigure geometry_msgs image_geometry image_transport roscpp rospy sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
 
@@ -128,24 +125,24 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(drv_face
-#   src/${PROJECT_NAME}/drv_face.cpp
+# add_library(drv_face_service
+#   src/${PROJECT_NAME}/drv_face_service.cpp
 # )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(drv_face ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(drv_face_service ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(drv_face_node src/drv_face_node.cpp)
+# add_executable(drv_face_service_node src/drv_face_service_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(drv_face_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(drv_face_service_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(drv_face_node
+# target_link_libraries(drv_face_service_node
 #   ${catkin_LIBRARIES}
 # )
 
@@ -164,7 +161,7 @@ include_directories(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS drv_face drv_face_node
+# install(TARGETS drv_face_service drv_face_service_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -189,7 +186,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_drv_face.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_drv_face_service.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

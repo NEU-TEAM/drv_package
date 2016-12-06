@@ -18,6 +18,8 @@
 #include <dynamic_reconfigure/server.h>
 #include <drv_tf/tfConfig.h>
 
+#include "movemean.h"
+
 #define DEBUG_TRANS
 
 // camera frame rotation about world frame
@@ -43,12 +45,9 @@ float dy_yaw_to_base = 0;
 double dz_yaw_to_base_ = 1.1;
 
 
-float imuPitchTemp_ = 0.0;
-int tol_ = 1; // the tolerance (degree) about camera shaking
-int pitch_offset_ = 101; // offset for pitch which was got from IMU
+float pitch_offset_ = 101; // offset for pitch which was got from IMU
 
-int servoPitchTemp_ = 0; // judge if the servo pitch value is changing
-bool pitchChanged_ = false; // if pitch is not changed, make camera steady
+int servoPitch_ = 0; // judge if the servo pitch value is changing
 
 // roslaunch param
 std::string cameraLinkFrameID_ = "/camera_link_frame";
@@ -60,35 +59,28 @@ std::string visionNameSpaceID_ = "/vision";
 
 std::string pointCloudSourceTopic_ = "/point_cloud";
 
+MoveMean mm(50); // the value indicate the strengh to stable the camera.
+
 void configCallback(drv_tf::tfConfig &config, uint32_t level)
 {
     ROS_INFO("Reconfigure Request: offset: %d, height: %f.\n", config.camera_pitch_offset_cfg, config.ground_to_base_height_cfg);
     pitch_offset_ = config.camera_pitch_offset_cfg;
     dz_yaw_to_base_ = config.ground_to_base_height_cfg;
-    pitchChanged_ = true;
 }
 
 void servoCallback(const std_msgs::UInt16MultiArrayConstPtr &msg)
 {
-    int servo_pitch = (msg->data[0]);
-    if (servoPitchTemp_ != servo_pitch)
-        {
-            pitchChanged_ = true;
-            servoPitchTemp_ = servo_pitch;
-        }
     // this callback should always active
+    servoPitch_ = (msg->data[0]);
     yaw_ = (msg->data[1] - 90) * 0.01745;
 }
 
 void imuCallback(const std_msgs::Float32ConstPtr & msg)
 {
+    float imuPitchTemp = 0.0;
     pitch_ = msg->data - pitch_offset_; // notice that pitch_ < 0
-    if (fabs(pitch_ - imuPitchTemp_) > tol_  &&  pitchChanged_)
-        {
-            imuPitchTemp_ = pitch_;
-            pitchChanged_ = false; // reset the state each loop, cause this will be true if it has changed.
-        }
-    pitch_ = imuPitchTemp_  * 0.01745; // 3.14159 / 180.0
+    mm.getMoveMean(pitch_, imuPitchTemp);
+    pitch_ = imuPitchTemp * 0.01745; // 3.14159 / 180.0
 }
 
 void tfCallback(const std_msgs::HeaderConstPtr & msg)

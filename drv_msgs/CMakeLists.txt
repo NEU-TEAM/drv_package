@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
 
  add_message_files(
    FILES
+   recognized_faces.msg
    recognized_objects.msg
    recognized_target.msg
    target_info.msg

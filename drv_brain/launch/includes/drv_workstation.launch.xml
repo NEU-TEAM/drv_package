@@ -24,7 +24,7 @@
   </node>
 
   <!-- initialize recognition service -->
-  <node name="drv_recognize" pkg="drv_recognize" type="drv_recognize.py">
+  <node name="drv_recognize" pkg="drv_recognize" type="drv_recognize.py" output="screen">
   </node>
 
   <!-- initialize user selection service -->
@@ -36,16 +36,21 @@
   </node>
 
   <!-- initialize tracking function -->
-  <node name="drv_track_node" pkg="drv_track" type="drv_track_node">
+  <node name="drv_track_node" pkg="drv_track" type="drv_track_node" output="screen">
   </node>
 
   <!-- initialize grasp planning function -->
-  <node name="drv_grasp" pkg="drv_grasp" type="drv_grasp">
+  <node name="drv_grasp" pkg="drv_grasp" type="drv_grasp" output="screen">
   </node>
 
   <!-- initialize face recognition service -->
-  <node name="drv_face" pkg="drv_face" type="drv_face.py" output="screen">
+  <node name="drv_face_service" pkg="drv_face_service" type="drv_face_service.py" output="screen">
     <param name="face_likehood_threshold" value="0.9"/>
   </node>
+
+  <!-- initialize face recognition client -->
+  <node name="drv_face_client" pkg="drv_face_client" type="drv_face_client" output="screen">
+  </node>
+
 
 </launch>

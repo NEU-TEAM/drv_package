@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 #include "androidlistener.h"
+#include "facelistener.h"
 #include "targetlistener.h"
 
 using namespace std;
@@ -27,6 +28,7 @@ string param_vision_feedback_mode = "/comm/param/feedback/vision/mode"; // 0:wan
 string param_vision_feedback_search = "/comm/param/feedback/vision/search"; // 0:no search, 1:found, -1:current not found. -2:around not found
 string param_vision_feedback_track = "/comm/param/feedback/vision/track"; // 0:no track, 1:tracking, -1:lost
 string param_vision_feedback_grasp = "/comm/param/feedback/vision/grasp"; // 0:no grasp, 1:found location, -1:can't find location
+string param_vision_feedback_face = "/comm/param/feedback/vision/face"; // 0:no face recognize, 1:found faces, -1:failed to recognize
 // vision shared
 string param_vision_shared_switch = "/comm/param/shared/vision/switch"; // true:switch on to execute tasks, false:switch off and run in wander mode
 // robot movement control param
@@ -183,6 +185,23 @@ void graspCallback(const std_msgs::BoolConstPtr &msg)
         }
 }
 
+void faceRecognizeCallback(const std_msgs::BoolConstPtr &msg)
+{
+    if (modeType_ == m_wander)
+        {
+            if (!msg->data)
+                {
+                    pubInfo("Failed to recognize face.");
+                    ros::param::set(param_vision_feedback_face, -1);
+                }
+            else
+                {
+                    pubInfo("Face recognized");
+                    ros::param::set(param_vision_feedback_face, 1);
+                }
+        }
+}
+
 
 void resetStatus()
 {
@@ -190,6 +209,7 @@ void resetStatus()
 		ros::param::set(param_vision_feedback_search, 0);
 		ros::param::set(param_vision_feedback_track, 0);
 		ros::param::set(param_vision_feedback_grasp, 0);
+		ros::param::set(param_vision_feedback_face, 0);
 
 		tgtType_ = t_null;
 		targetLabel_ = "";
@@ -219,8 +239,10 @@ int main(int argc, char **argv)
 		ros::Subscriber sub_sh = nh.subscribe<std_msgs::Int8>("status/search/feedback", 1, searchCallback);
 		ros::Subscriber sub_tk = nh.subscribe<std_msgs::Bool>("status/track/feedback", 1, trackCallback);
 		ros::Subscriber sub_gp = nh.subscribe<std_msgs::Bool>("status/grasp/feedback", 1, graspCallback);
+		ros::Subscriber sub_fr = nh.subscribe<std_msgs::Bool>("status/face/feedback", 1, faceRecognizeCallback);
 
 		AndroidListener al;
+		FaceListener fl;
 		TargetListener tl;
 
 		pubInfo("Deep Robot Vision system initialized!");
@@ -292,12 +314,16 @@ int main(int argc, char **argv)
 												}
 										else
 												{
-														modeType_ = m_search;
+														if (targetLabel_ == "user selected object")
+																resetStatus();
+														else
+																modeType_ = m_search;
 												}
 								}
 						else
 								{
 										modeType_ = m_wander;
+										fl.isNeedRecognizeFace(); // only recognize face in wander mode
 								}
 
 						// set mode

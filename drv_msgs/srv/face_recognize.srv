@@ -1,4 +1,4 @@
 sensor_msgs/Image[] images_in
 
 ---
-std_msgs/UInt8MultiArray face_label_ids
+int32[] face_label_ids
