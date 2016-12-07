@@ -24,6 +24,7 @@ using namespace std;
 
 /* global params */
 // feedback
+string param_vision_feedback = "/comm/param/feedback/vision"; // 0:not working, 1:working, 2:failed
 string param_vision_feedback_mode = "/comm/param/feedback/vision/mode"; // 0:wandering, 1:searching, 2:tracking
 string param_vision_feedback_search = "/comm/param/feedback/vision/search"; // 0:no search, 1:found, -1:current not found. -2:around not found
 string param_vision_feedback_track = "/comm/param/feedback/vision/track"; // 0:no track, 1:tracking, -1:lost
@@ -31,8 +32,6 @@ string param_vision_feedback_grasp = "/comm/param/feedback/vision/grasp"; // 0:n
 string param_vision_feedback_face = "/comm/param/feedback/vision/face"; // 0:no face recognize, 1:found faces, -1:failed to recognize
 // vision shared
 string param_vision_shared_switch = "/comm/param/shared/vision/switch"; // true:switch on to execute tasks, false:switch off and run in wander mode
-// robot movement control param
-string param_base_move = "/comm/param/shared/movement/base/move"; // 0: free move, 1: should go to next position, -1: hold
 
 bool centralSwitch_ = true; // main switch
 
@@ -129,21 +128,21 @@ void searchCallback(const std_msgs::Int8ConstPtr &msg)
                     pubInfo("Search around didn't get target, continue searching...");
                     foundTarget_ = false;
                     ros::param::set(param_vision_feedback_search, -2);
-                    ros::param::set(param_base_move, 1);
+                    ros::param::set(param_vision_feedback, 2);
                 }
             else if (msg->data == 0)
                 {
                     pubInfo("Currently didn't find target, continue searching...");
                     ros::param::set(param_vision_feedback_search, -1);
+                    ros::param::set(param_vision_feedback, 1);
                     foundTarget_ = false;
-                    ros::param::set(param_base_move, -1);
                 }
             else
                 {
                     pubInfo("Searching found the " + targetLabel_);
                     foundTarget_ = true;
                     ros::param::set(param_vision_feedback_search, 1);
-                    ros::param::set(param_base_move, 0);
+                    ros::param::set(param_vision_feedback, 1);
                 }
         }
 }
@@ -158,12 +157,14 @@ void trackCallback(const std_msgs::BoolConstPtr &msg)
                     ROS_INFO_THROTTLE(21, "Target lost!");
                     foundTarget_ = false;
                     ros::param::set(param_vision_feedback_track, -1);
+                    ros::param::set(param_vision_feedback, 2);
                 }
             else
                 {
                     ROS_INFO_THROTTLE(21, "Tracking the target...");
                     foundTarget_ = true;
                     ros::param::set(param_vision_feedback_track, 1);
+                    ros::param::set(param_vision_feedback, 1);
                 }
         }
 }
@@ -176,11 +177,13 @@ void graspCallback(const std_msgs::BoolConstPtr &msg)
                 {
                     ROS_INFO_THROTTLE(21, "Failed to locate the target.");
                     ros::param::set(param_vision_feedback_grasp, -1);
+                    ros::param::set(param_vision_feedback, 2);
                 }
             else
                 {
                     ROS_INFO_THROTTLE(21, "Target location confirmed.");
                     ros::param::set(param_vision_feedback_grasp, 1);
+                    ros::param::set(param_vision_feedback, 1);
                 }
         }
 }
@@ -193,11 +196,13 @@ void faceRecognizeCallback(const std_msgs::BoolConstPtr &msg)
                 {
                     pubInfo("Failed to recognize face.");
                     ros::param::set(param_vision_feedback_face, -1);
+                    ros::param::set(param_vision_feedback, 2);
                 }
             else
                 {
                     pubInfo("Face recognized");
                     ros::param::set(param_vision_feedback_face, 1);
+                    ros::param::set(param_vision_feedback, 1);
                 }
         }
 }
@@ -206,6 +211,7 @@ void faceRecognizeCallback(const std_msgs::BoolConstPtr &msg)
 void resetStatus()
 {
 		// reset global params
+		ros::param::set(param_vision_feedback, 0);
 		ros::param::set(param_vision_feedback_search, 0);
 		ros::param::set(param_vision_feedback_track, 0);
 		ros::param::set(param_vision_feedback_grasp, 0);
@@ -218,7 +224,6 @@ void resetStatus()
 		foundTarget_ = false;
 
 		modeType_ = m_wander;
-		ros::param::set(param_base_move, 0);
 }
 
 int main(int argc, char **argv)
@@ -245,12 +250,10 @@ int main(int argc, char **argv)
 		FaceListener fl;
 		TargetListener tl;
 
-		pubInfo("Deep Robot Vision system initialized!");
+		// initialize
+		resetStatus();
 
-		// initialize global params
-		ros::param::set(param_vision_feedback_search, 0);
-		ros::param::set(param_vision_feedback_track, 0);
-		ros::param::set(param_vision_feedback_grasp, 0);
+		pubInfo("Deep Robot Vision system initialized!");
 
 		while (ros::ok())
 				{

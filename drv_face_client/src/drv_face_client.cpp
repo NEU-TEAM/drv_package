@@ -189,6 +189,7 @@ int main(int argc, char **argv)
 								}
 						else
 								{
+										faceSearchResult_ = false;
 										ROS_ERROR("Failed to call face recognize service.");
 								}
 

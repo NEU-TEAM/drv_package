@@ -17,4 +17,8 @@
   <node name="drv_brain" pkg="drv_brain" type="drv_brain" output="screen">
   </node>
 
+  <!-- initialize action service -->
+  <node name="drv_action" pkg="drv_action" type="drv_action" output="screen">
+  </node>
+
 </launch>
