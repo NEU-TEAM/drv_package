@@ -42,14 +42,11 @@ void Utilities::markImage(Mat img_in, Rect roi, Mat &img_out, std::vector<unsign
 								}
 				}
 
-//		imshow("sls", closed);
-//		waitKey(10);
-
 		vector<vector<Point> > contours;
 		findContours(closed, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
 		drawContours(img_out, contours, 0, Scalar(196,0,225), 2);
-
+		rectangle(img_out, roi, Scalar(0, 255, 0));
 		drawObject(roi_center.x, roi_center.y, img_out);
 }
 
@@ -73,4 +70,50 @@ void Utilities::drawObject(int x, int y, Mat &frame)
 		else line(frame,Point(x,y),Point(FRAME_WIDTH,y),Scalar(0,255,0),2);
 
 		putText(frame, intToString(x) + "," + intToString(y), Point(x,y+30), 1, 1, Scalar(0,255,0), 1.5);
+}
+
+void Utilities::expandGt(Rect &gt, int margin)
+{
+		int w = gt.width;
+		int h = gt.height;
+		int x = gt.x;
+		int y = gt.y;
+		if (x - margin < 0)
+				{
+						w += x;
+						gt.x = 0;
+				}
+		else
+				{
+						gt.x = x - margin;
+						w += margin;
+				}
+		if (x + gt.width + margin >= 640)
+				{
+						w += 640 - x - gt.width;
+				}
+		else
+				{
+						w += margin;
+				}
+		if (y - margin < 0)
+				{
+						h += y;
+						gt.y = 0;
+				}
+		else
+				{
+						gt.y = y - margin;
+						h += margin;
+				}
+		if (y + gt.height + margin >= 480)
+				{
+						h += 480 - y - gt.height;
+				}
+		else
+				{
+						h += margin;
+				}
+		gt.width = w;
+		gt.height = h;
 }

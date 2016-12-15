@@ -11,7 +11,7 @@ public:
     static void drawObject(int x, int y, cv::Mat &frame);
     static void markImage(cv::Mat img_in, cv::Rect roi, cv::Mat &img_out, std::vector<unsigned int> &mask_id);
     static std::string intToString(int number);
-
+    static void expandGt(cv::Rect &gt, int margin);
 };
 
 #endif // UTILITIES_H

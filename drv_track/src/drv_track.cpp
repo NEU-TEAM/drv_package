@@ -48,7 +48,7 @@ string test_proto = "/home/aicrobo/GOTURN/nets/tracker.prototxt";
 string caffe_model  = "/home/aicrobo/GOTURN/nets/models/pretrained_model/tracker.caffemodel";
 int gpu_id = 0;
 const bool do_train = false;
-const bool show_output = false;
+const bool show_output = true;
 Goturn GO(test_proto, caffe_model, gpu_id, do_train, show_output);
 
 // Target infomation

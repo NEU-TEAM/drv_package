@@ -9,8 +9,8 @@ bool FaceDetector::Process(Mat img_in, Mat &img_out, vector<Rect> &faceRoi, std:
     CascadeClassifier cascade, nestedCascade;
     bool stop = false;
 
-    cascade.load("/home/aicrobo/haarcascade_frontalface_alt.xml");
-    nestedCascade.load("/home/aicrobo/haarcascade_eye_tree_eyeglasses.xml");
+    cascade.load("/home/aicrobo/catkin_ws/src/drv_package/supplements/face_feature/haarcascade_frontalface_alt.xml");
+    nestedCascade.load("/home/aicrobo/catkin_ws/src/drv_package/supplements/face_feature/haarcascade_eye_tree_eyeglasses.xml");
 
     detectAndDraw(img_in, img_out, cascade, nestedCascade, 1, 0, faceRoi);
     if (!faceRoi.size())

@@ -42,23 +42,23 @@ Rect Goturn::goTrack(Mat img)
 bool Goturn::goProcess(Mat img_in, Rect gt, Mat &img_out, Rect &detection, std::vector<unsigned int> &mask_id)
 {
     if (tracker_initialized_)
-    {
-        detection = goTrack(img_in);
-    }
+        {
+            detection = goTrack(img_in);
+        }
     else
-    {
-        goInit(img_in, gt);
-        detection = gt;
-    }
+        {
+            Utilities::expandGt(gt, 3);
+            goInit(img_in, gt);
+            detection = gt;
+        }
 
     Utilities::markImage(img_in, detection, img_out, mask_id);
-    waitKey(10);
 
     if (detection.area() < MIN_OBJECT_AREA ||  mask_id.size() < MIN_OBJECT_AREA ||
             detection.area() > MAX_OBJECT_AREA || mask_id.size() > MAX_OBJECT_AREA)
-    {
-        return false;
-    }
+        {
+            return false;
+        }
     else
         return true;
 }

@@ -102,5 +102,5 @@ void Tracker::ShowTracking(const cv::Mat& target_pad, const cv::Mat& curr_search
 
   cv::namedWindow("Estimate", cv::WINDOW_AUTOSIZE );// Create a window for display.
   cv::imshow("Estimate", image_with_box );                   // Show our image inside it.
-  cv::waitKey(0);
+  cv::waitKey(8);
 }
