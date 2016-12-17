@@ -4,7 +4,7 @@
 //minimum and maximum object area
 const int MIN_OBJECT_AREA = 400;
 const int MAX_OBJECT_AREA =  160000;
-const float COLOR_TH = 20;
+const float COLOR_TH = 10;
 
 Goturn::Goturn(string test_proto, string caffe_model, int gpu_id,
                const bool do_train, const bool show_output)
@@ -61,7 +61,7 @@ bool Goturn::goProcess(Mat img_in, Rect gt, Mat &img_out, Rect &detection, std::
             color_mean_temp_ = color_mean;
         }
     double diff  = fabs(color_mean - color_mean_temp_);
-    std::cerr << diff << std::endl;
+    // std::cerr << diff << std::endl;
 
     if (detection.area() < MIN_OBJECT_AREA ||  mask_id.size() < MIN_OBJECT_AREA ||
             detection.area() > MAX_OBJECT_AREA || mask_id.size() > MAX_OBJECT_AREA

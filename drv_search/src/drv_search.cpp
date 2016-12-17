@@ -124,7 +124,6 @@ int main(int argc, char **argv)
 						if (ros::param::has(param_servo_yaw))
 								ros::param::get(param_servo_yaw, yawAngle_);
 
-
 						if (ros::param::has(param_running_mode))
 								ros::param::get(param_running_mode, modeType_);
 
@@ -161,25 +160,22 @@ int main(int argc, char **argv)
 
 						if (client.call(srv))
 								{
-										// call user select service if selectnum != 1, i.e. no target selected or more than 1 target candidates
-										if (selectedNum_ != 1)
+										if (!searchResult_)
 												{
 														cv_bridge::CvImagePtr img_labeled;
 														selectedNum_ = ts.select(targetLabel_, srv.response, img_msg_, img_labeled, choosed_id);
-												}
 
-										int a_s = srv.response.obj_info.bbox_arrays.size();
-										bbox_arrays_.resize(a_s);
-										bbox_arrays_ = srv.response.obj_info.bbox_arrays;
+														int a_s = srv.response.obj_info.bbox_arrays.size();
+														bbox_arrays_.resize(a_s);
+														bbox_arrays_ = srv.response.obj_info.bbox_arrays;
 
-										if (selectedNum_)
-												{
-														searchResult_ = 1;
+														if (selectedNum_)
+																		searchResult_ = 1;
+														else
+																		searchResult_ = 0;
 												}
 										else
-												{
-														searchResult_ = 0;
-												}
+												ROS_WARN("Search has been done.");
 								}
 						else
 								{

@@ -296,7 +296,7 @@ int main(int argc, char **argv)
     ros::Subscriber sub_track = nh.subscribe<drv_msgs::recognized_target>("track/recognized_target", 1, trackResultCallback);
     ros::Subscriber sub_clouds = nh.subscribe<PointCloud>("/point_cloud", 1, cloudCallback);
 
-    ROS_WARN("Grasping plan function initialized!\n");
+    ROS_INFO("Grasping plan function initialized!\n");
 
     while (ros::ok())
         {

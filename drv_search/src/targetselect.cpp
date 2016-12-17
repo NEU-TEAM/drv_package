@@ -5,9 +5,7 @@ using namespace cv;
 TargetSelect::TargetSelect() : rgb_it(nh)
 {
 		searchPubImage_ = rgb_it.advertise("search/labeled_image", 1);
-
 		searchPubInfo_ = nh.advertise<std_msgs::String>("/comm/vision/info", 1);
-
 		client = nh.serviceClient<drv_msgs::user_select>("drv_user");
 }
 
@@ -36,8 +34,6 @@ int TargetSelect::select(std::string targetLabel, drv_msgs::recognizeResponse re
 								{
 										id_candidate.push_back(i);
 										fc++;
-										ROS_INFO("Found %d object(s) that may be the target!\n", fc);
-
 										paintTarget(img_out->image, i, fc, response.obj_info.bbox_arrays);
 								}
 				}
@@ -50,6 +46,7 @@ int TargetSelect::select(std::string targetLabel, drv_msgs::recognizeResponse re
 				}
 		else
 				{
+						ROS_INFO("Found %d object(s) that may be the target!\n", fc);
 						selectedNum = callService(fc); // value range [0,inf)
 				}
 
@@ -71,7 +68,7 @@ int TargetSelect::callService(int num)
 						result = srv.response.selected_id;
 						if (result == 0)
 								{
-										pubInfo("You have comfirmed current scene have no target.");
+										ROS_INFO("You have comfirmed current scene have no target.");
 								}
 						else
 								{
