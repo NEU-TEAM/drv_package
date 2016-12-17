@@ -9,7 +9,7 @@ public:
     Utilities();
 
     static void drawObject(int x, int y, cv::Mat &frame);
-    static void markImage(cv::Mat img_in, cv::Rect roi, cv::Mat &img_out, std::vector<unsigned int> &mask_id);
+    static void markImage(cv::Mat img_in, cv::Rect roi, cv::Mat &img_out, std::vector<unsigned int> &mask_id, float &color_mean);
     static std::string intToString(int number);
     static void expandGt(cv::Rect &gt, int margin);
 };

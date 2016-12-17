@@ -4,6 +4,7 @@
 //minimum and maximum object area
 const int MIN_OBJECT_AREA = 400;
 const int MAX_OBJECT_AREA =  160000;
+const float COLOR_TH = 20;
 
 Goturn::Goturn(string test_proto, string caffe_model, int gpu_id,
                const bool do_train, const bool show_output)
@@ -41,26 +42,38 @@ Rect Goturn::goTrack(Mat img)
 
 bool Goturn::goProcess(Mat img_in, Rect gt, Mat &img_out, Rect &detection, std::vector<unsigned int> &mask_id)
 {
+    float color_mean;
     if (tracker_initialized_)
         {
+            // Mat img_ext;
+            // Utilities::extractByColor(img_in, img_ext, detection_temp_);
             detection = goTrack(img_in);
+            Utilities::markImage(img_in, detection, img_out, mask_id, color_mean);
         }
     else
         {
             Utilities::expandGt(gt, 3);
+            // Mat img_ext;
+            // Utilities::extractByColor(img_in, img_ext, gt);
             goInit(img_in, gt);
             detection = gt;
+            Utilities::markImage(img_in, detection, img_out, mask_id, color_mean);
+            color_mean_temp_ = color_mean;
         }
-
-    Utilities::markImage(img_in, detection, img_out, mask_id);
+    double diff  = fabs(color_mean - color_mean_temp_);
+    std::cerr << diff << std::endl;
 
     if (detection.area() < MIN_OBJECT_AREA ||  mask_id.size() < MIN_OBJECT_AREA ||
-            detection.area() > MAX_OBJECT_AREA || mask_id.size() > MAX_OBJECT_AREA)
+            detection.area() > MAX_OBJECT_AREA || mask_id.size() > MAX_OBJECT_AREA
+            || diff > COLOR_TH)
         {
             return false;
         }
     else
-        return true;
+        {
+            color_mean_temp_ = color_mean;
+            return true;
+        }
 }
 
 

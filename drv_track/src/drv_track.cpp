@@ -217,7 +217,7 @@ int main(int argc, char **argv)
     if (ros::param::has(param_servo_yaw))
         ros::param::get(param_servo_yaw, yaw_);
 
-    ROS_WARN("Tracking function initialized!\n");
+    ROS_INFO("Tracking function initialized!\n");
 
     while (ros::ok())
     {

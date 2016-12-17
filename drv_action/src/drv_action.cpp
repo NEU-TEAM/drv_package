@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 
+#include <std_msgs/String.h>
 #include <geometry_msgs/PoseStamped.h>
 
 #include <actionlib/server/simple_action_server.h>
@@ -8,6 +9,9 @@
 #include <drv_msgs/recognized_faces.h>
 
 using namespace std;
+
+enum FeedbackType{f_wander, f_working, f_failed};
+enum GoalType{g_none, g_object, g_face};
 
 class VisionAction
 {
@@ -22,6 +26,7 @@ protected:
 
     ros::Subscriber sub_face_;
     ros::Subscriber sub_object_;
+    ros::Publisher pub_info_;
 
 public:
     VisionAction(std::string name) :
@@ -31,11 +36,10 @@ public:
         param_target_set =   "/comm/param/control/target/is_set";
         param_target_label = "/comm/param/control/target/label";
 
-        local_param_need_recog = "/vision/face/need_recognize";
+        param_need_recognize_face = "/vision/face/need_recognize";
 
         param_vision_feedback = "/comm/param/feedback/vision";
 
-        success_ = false;
         running_mode_ = 0;
         status_ = 0;
         error_detail_ = 0;
@@ -43,11 +47,21 @@ public:
         sub_face_ = nh_.subscribe<drv_msgs::recognized_faces>("face/recognized_faces", 1, &VisionAction::faceCB, this);
         sub_object_ = nh_.subscribe<geometry_msgs::PoseStamped>("grasp/pose", 1, &VisionAction::objectCB, this);
 
+        pub_info_ = nh_.advertise<std_msgs::String>("/comm/msg/vision/info", 1);
+
         as_.start();
     }
 
     ~VisionAction(void)
     {
+    }
+
+    void pubInfo(string info)
+    {
+        ROS_INFO(info.c_str());
+        std_msgs::String msg;
+        msg.data = info;
+        pub_info_.publish(msg);
     }
 
     void getStatus()
@@ -57,9 +71,8 @@ public:
 
     void resetStatus()
     {
-        success_ = false;
         ros::param::set(param_target_set, false);
-        ros::param::set(local_param_need_recog, false);
+        ros::param::set(param_need_recognize_face, false);
     }
 
     void faceCB(const drv_msgs::recognized_facesConstPtr &face)
@@ -75,79 +88,79 @@ public:
 
     void executeCB(const drv_msgs::VisionGoalConstPtr &goal)
     {
-        resetStatus(); // first reset all param
-
-        if (goal->mode == 0)
+        if (goal->mode == g_none)
             {
-                feedback_.status = 0;
-                // publish the feedback
+                resetStatus();
+                feedback_.status = f_wander;
                 as_.publishFeedback(feedback_);
                 return;
             }
-        else if (goal->mode == 1)
+        else if (goal->mode == g_object)
             {
                 if (goal->target_label == "")
                     {
-                        feedback_.status = 2;
+                        feedback_.status = f_failed;
                         as_.publishFeedback(feedback_);
                         return;
                     }
                 else
                     {
-                        ros::param::set(param_target_set, true);
                         ros::param::set(param_target_label, goal->target_label);
-                        feedback_.status = 1;
+                        ros::param::set(param_target_set, true);
+                        feedback_.status = f_working;
                         as_.publishFeedback(feedback_);
                     }
             }
-        else if (goal->mode == 2)
+        else if (goal->mode == g_face)
             {
-                ros::param::set(local_param_need_recog, true);
+                ros::param::set(param_need_recognize_face, true);
                 // face recognize
-                feedback_.status = 1;
+                feedback_.status = f_working;
                 as_.publishFeedback(feedback_);
             }
         else
             {
-                feedback_.status = 2;
+                feedback_.status = f_failed;
                 as_.publishFeedback(feedback_);
                 return;
             }
 
         // publish info to the console for the user
-        ROS_INFO("%s: Executing...", action_name_.c_str());
+        pubInfo("Vision Action: Executing...");
 
         // start executing the action
         if (as_.isPreemptRequested() || !ros::ok())
             {
-                ROS_INFO("%s: Preempted", action_name_.c_str());
-                // set the action state to preempted
+                pubInfo("Vision Action: Preempted.");
+
+                feedback_.status = f_wander;
+                as_.publishFeedback(feedback_);
                 as_.setPreempted();
-                success_ = false;
+                return;
             }
         else
             {
                 getStatus();
                 feedback_.status = status_;
-//                feedback_.error_detail_ = status_detail_; // the detail is not usable for now
+                // feedback_.error_detail_ = status_detail_; // the detail is not usable for now
                 as_.publishFeedback(feedback_);
             }
 
-        if(success_)
+        if(status_ == 3 && goal->mode != g_none)
             {
-                if (running_mode_ == 1)
+                if (goal->mode == g_object)
                     {
                         // in recognize object mode
                         result_.target_pose = target_pose_;
                     }
-                else
+                else if (goal->mode == g_face)
                     {
                         // in recognize face mode
                         result_.names = names_;
                         result_.ids = name_ids_;
                     }
 
-                ROS_INFO("%s: Succeeded", action_name_.c_str());
+                pubInfo("Vision Action: Succeeded.");
                 as_.setSucceeded(result_);
                 resetStatus(); // if goal has been reached, reset.
             }
@@ -161,14 +174,12 @@ private:
     // goal
     string param_target_set;
     string param_target_label;
-    string local_param_need_recog;
+    string param_need_recognize_face;
 
     // overall feedback
     string param_vision_feedback;
 
     // result
-    bool success_;
-
     geometry_msgs::PoseStamped target_pose_;
     vector<int> name_ids_;
     vector<std_msgs::String> names_;

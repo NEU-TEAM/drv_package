@@ -17,7 +17,7 @@ std::string Utilities::intToString(int number)
 		return ss.str();
 }
 
-void Utilities::markImage(Mat img_in, Rect roi, Mat &img_out, std::vector<unsigned int> &mask_id)
+void Utilities::markImage(Mat img_in, Rect roi, Mat &img_out, std::vector<unsigned int> &mask_id, float &color_mean)
 {
 		Mat mask(img_in.rows + 2, img_in.cols + 2, CV_8UC1, Scalar(0));
 		Mat img_hsv;
@@ -30,6 +30,9 @@ void Utilities::markImage(Mat img_in, Rect roi, Mat &img_out, std::vector<unsign
 		Mat closed;
 		morphologyEx(mask, closed, MORPH_CLOSE, element);
 
+		int hueTemp = 0;
+		int count = 0;
+
 		// get the pixel id in mask
 		for (size_t r = 0; r < closed.rows; r++)
 				{
@@ -38,9 +41,14 @@ void Utilities::markImage(Mat img_in, Rect roi, Mat &img_out, std::vector<unsign
 										if (closed.at<uchar>(r, c) > 0)
 												{
 														mask_id.push_back((r - 1) * 640 + c - 1);
+														Vec3b hsvPixel = img_hsv.at<Vec3b>(r, c);
+														hueTemp += hsvPixel[0];
+														count++;
 												}
 								}
 				}
+		// use this to judge if the tracked object has changed
+		color_mean = hueTemp / count;
 
 		vector<vector<Point> > contours;
 		findContours(closed, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);

@@ -134,7 +134,9 @@ void Regressor::Estimate(const cv::Mat& image, const cv::Mat& target, std::vecto
   Preprocess(target, &target_channels);
 
   // Perform a forward-pass in the network.
-  net_->ForwardPrefilled();
+  float *loss = new float;
+  net_->ForwardPrefilled(loss);
+//  std::cerr<< "Loss is: " << *loss << std::endl;
 
   // Get the network output.
   GetOutput(output);
