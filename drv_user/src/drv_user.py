@@ -61,7 +61,7 @@ def user_select_server():
     rospy.init_node('user_select_server')
     s = rospy.Service('drv_user', user_select, handle_user_select)
     rospy.set_param(param_vision_search_param_lock, True)  # at beginning set param change locked
-    print "Ready to get user selection."
+    print "Ready to receive user selection."
     rospy.spin()
 
 

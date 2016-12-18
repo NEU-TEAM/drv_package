@@ -24,7 +24,7 @@ using namespace std;
 
 /* global params */
 // feedback
-string param_vision_feedback = "/comm/param/feedback/vision"; // 0:not working, 1:working, 2:failed, 3:finished with success
+string param_vision_feedback = "/comm/param/feedback/vision/overall"; // 0:not working, 1:working, 2:failed, 3:finished with success
 string param_vision_feedback_mode = "/comm/param/feedback/vision/mode"; // 0:wandering, 1:searching, 2:tracking
 string param_vision_feedback_search = "/comm/param/feedback/vision/search"; // 0:no search, 1:found, -1:current not found. -2:around not found
 string param_vision_feedback_track = "/comm/param/feedback/vision/track"; // 0:no track, 1:tracking, -1:lost
@@ -157,7 +157,7 @@ void trackCallback(const std_msgs::BoolConstPtr &msg)
                     ROS_INFO_THROTTLE(21, "Target lost!");
                     foundTarget_ = false;
                     ros::param::set(param_vision_feedback_track, -1);
-                    ros::param::set(param_vision_feedback, 2);
+                    ros::param::set(param_vision_feedback, 1);
                 }
             else
                 {
@@ -177,7 +177,7 @@ void graspCallback(const std_msgs::BoolConstPtr &msg)
                 {
                     ROS_INFO_THROTTLE(21, "Failed to locate the target.");
                     ros::param::set(param_vision_feedback_grasp, -1);
-                    ros::param::set(param_vision_feedback, 2);
+                    ros::param::set(param_vision_feedback, 1);
                 }
             else
                 {
@@ -200,7 +200,7 @@ void faceRecognizeCallback(const std_msgs::BoolConstPtr &msg)
                 }
             else
                 {
-                    pubInfo("Face recognized");
+                    pubInfo("Face recognition finished.");
                     ros::param::set(param_vision_feedback_face, 1);
                     ros::param::set(param_vision_feedback, 3);
                 }
@@ -299,7 +299,7 @@ int main(int argc, char **argv)
 												}
 										else
 												{
-														pubInfo("Target canceled.");
+														pubInfo("Target cancelled.");
 														resetStatus();
 												}
 										targetSetTemp = isTargetSet_;

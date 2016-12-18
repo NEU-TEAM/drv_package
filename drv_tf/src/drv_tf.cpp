@@ -20,7 +20,7 @@
 
 #include "movemean.h"
 
-#define DEBUG_TRANS
+//#define DEBUG_TRANS
 
 // camera frame rotation about world frame
 float pitch_ = 0.0; // rotation angle -90 between camera optical frame and link is not included

@@ -19,8 +19,11 @@ protected:
     ros::NodeHandle nh_;
     // NodeHandle instance must be created before this line. Otherwise strange error may occur.
     actionlib::SimpleActionServer<drv_msgs::VisionAction> as_;
-    std::string action_name_;
+    string action_name_;
     // create messages that are used to published feedback/result
+    boost::shared_ptr<const drv_msgs::VisionGoal_ <std::allocator<void> > > goal_;
+    int goal_mode_;
+    string target_label_;
     drv_msgs::VisionFeedback feedback_;
     drv_msgs::VisionResult result_;
 
@@ -30,25 +33,25 @@ protected:
 
 public:
     VisionAction(std::string name) :
-        as_(nh_, name, boost::bind(&VisionAction::executeCB, this, _1), false),
-        action_name_(name)
+        as_(nh_, name,  false), action_name_(name)
     {
-        param_target_set =   "/comm/param/control/target/is_set";
-        param_target_label = "/comm/param/control/target/label";
+        param_action_target_set =   "/vision/param/action/target/is_set";
+        param_action_target_label = "/vision/param/action/target/label";
+        param_action_need_recognize_face = "/vision/param/action/face/need_recognize";
 
-        param_need_recognize_face = "/vision/face/need_recognize";
+        param_vision_feedback = "/comm/param/feedback/vision/overall";
 
-        param_vision_feedback = "/comm/param/feedback/vision";
+        status_feedback_ = f_wander;
 
-        running_mode_ = 0;
-        status_ = 0;
-        error_detail_ = 0;
+        as_.registerGoalCallback(boost::bind(&VisionAction::goalCB, this));
+        as_.registerPreemptCallback(boost::bind(&VisionAction::preemptCB, this));
 
         sub_face_ = nh_.subscribe<drv_msgs::recognized_faces>("face/recognized_faces", 1, &VisionAction::faceCB, this);
         sub_object_ = nh_.subscribe<geometry_msgs::PoseStamped>("grasp/pose", 1, &VisionAction::objectCB, this);
 
         pub_info_ = nh_.advertise<std_msgs::String>("/comm/msg/vision/info", 1);
 
+        trigger_ = false;
         as_.start();
     }
 
@@ -66,123 +69,104 @@ public:
 
     void getStatus()
     {
-        ros::param::get(param_vision_feedback, status_);
+        ros::param::get(param_vision_feedback, status_feedback_);
     }
 
     void resetStatus()
     {
-        ros::param::set(param_target_set, false);
-        ros::param::set(param_need_recognize_face, false);
+        status_feedback_ = f_wander;
+        ros::param::set(param_vision_feedback, f_wander);
+        ros::param::set(param_action_target_set, false);
+        ros::param::set(param_action_target_label, "");
+        ros::param::set(param_action_need_recognize_face, false);
+        trigger_ = false;
+    }
+
+    void goalCB()
+    {
+        goal_ = as_.acceptNewGoal();
+        goal_mode_ = goal_->mode;
+        target_label_ = goal_->target_label;
+        if (goal_mode_ == g_object && target_label_ != "")
+            {
+                ros::param::set(param_action_target_label, target_label_);
+                ros::param::set(param_action_target_set, true);
+            }
+        if (goal_mode_ == g_face)
+            {
+                ros::param::set(param_action_need_recognize_face, true);
+            }
+        trigger_ = true;
+    }
+
+    void preemptCB()
+    {
+        pubInfo("Vision Action: Preempted.");
+        as_.setPreempted();
+        resetStatus();
     }
 
     void faceCB(const drv_msgs::recognized_facesConstPtr &face)
     {
-        name_ids_ = face->name_ids;
-        names_ = face->names;
+        if (!as_.isActive() || goal_mode_ != g_face || !trigger_)
+            return;
+
+        getStatus();
+        if (status_feedback_ == f_failed)
+            {
+                pubInfo("Vision Action: Failed to find face in current scene!");
+                as_.setAborted(result_);
+            }
+        else
+            {
+                result_.ids = face->name_ids;
+                result_.names = face->names;
+                pubInfo("Vision Action: Face recognition succeeded.");
+
+                if (face->names.empty())
+                        pubInfo("Vision Action: Did not find face in current scene.");
+
+                as_.setSucceeded(result_);
+            }
+        resetStatus();
     }
 
     void objectCB(const geometry_msgs::PoseStampedConstPtr &ps)
     {
-        target_pose_ = *ps;
-    }
+        if (!as_.isActive() || goal_mode_ !=  g_object || !trigger_)
+            return;
 
-    void executeCB(const drv_msgs::VisionGoalConstPtr &goal)
-    {
-        if (goal->mode == g_none)
+        if (ps->pose.position.z == 0)
+            return;
+
+        getStatus();
+        if (status_feedback_ == f_failed)
             {
-                resetStatus();
-                feedback_.status = f_wander;
-                as_.publishFeedback(feedback_);
-                return;
-            }
-        else if (goal->mode == g_object)
-            {
-                if (goal->target_label == "")
-                    {
-                        feedback_.status = f_failed;
-                        as_.publishFeedback(feedback_);
-                        return;
-                    }
-                else
-                    {
-                        ros::param::set(param_target_label, goal->target_label);
-                        ros::param::set(param_target_set, true);
-                        feedback_.status = f_working;
-                        as_.publishFeedback(feedback_);
-                    }
-            }
-        else if (goal->mode == g_face)
-            {
-                ros::param::set(param_need_recognize_face, true);
-                // face recognize
-                feedback_.status = f_working;
-                as_.publishFeedback(feedback_);
+                pubInfo("Vision Action: Failed to find target in current scene!");
+                as_.setAborted(result_);
             }
         else
             {
-                feedback_.status = f_failed;
-                as_.publishFeedback(feedback_);
-                return;
-            }
-
-        // publish info to the console for the user
-        pubInfo("Vision Action: Executing...");
-
-        // start executing the action
-        if (as_.isPreemptRequested() || !ros::ok())
-            {
-                pubInfo("Vision Action: Preempted.");
-
-                feedback_.status = f_wander;
-                as_.publishFeedback(feedback_);
-                as_.setPreempted();
-                return;
-            }
-        else
-            {
-                getStatus();
-                feedback_.status = status_;
-                // feedback_.error_detail_ = status_detail_; // the detail is not usable for now
-                as_.publishFeedback(feedback_);
-            }
-
-        if(status_ == 3 && goal->mode != g_none)
-            {
-                if (goal->mode == g_object)
-                    {
-                        // in recognize object mode
-                        result_.target_pose = target_pose_;
-                    }
-                else if (goal->mode == g_face)
-                    {
-                        // in recognize face mode
-                        result_.names = names_;
-                        result_.ids = name_ids_;
-                    }
-
-                pubInfo("Vision Action: Succeeded.");
+                result_.target_pose.header = ps->header;
+                result_.target_pose.pose = ps->pose;
+                pubInfo("Vision Action: Object recognition succeeded.");
                 as_.setSucceeded(result_);
-                resetStatus(); // if goal has been reached, reset.
             }
+        resetStatus();
     }
 
 private:
-    int running_mode_;
-    int status_;
-    int error_detail_;
+    // main switch
+    bool trigger_;
 
     // goal
-    string param_target_set;
-    string param_target_label;
-    string param_need_recognize_face;
+    string param_action_target_set;
+    string param_action_target_label;
+    string param_action_need_recognize_face;
 
     // overall feedback
+    int status_feedback_;
     string param_vision_feedback;
-
-    // result
-    geometry_msgs::PoseStamped target_pose_;
-    vector<int> name_ids_;
-    vector<std_msgs::String> names_;
 };
 
 

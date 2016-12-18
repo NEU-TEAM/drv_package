@@ -63,7 +63,7 @@ def handle_recognize(req):
 def recognize_server():
     rospy.init_node('recognize_server')
     s = rospy.Service('drv_recognize', recognize, handle_recognize)
-    print "Ready to recognize."
+    print "Ready to recognize objects."
     rospy.spin()
 
 
