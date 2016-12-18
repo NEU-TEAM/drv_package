@@ -34,19 +34,22 @@ def handle_user_select(req):
     pubSR.publish(sr_msg)
 
     rospy.set_param(param_vision_search_param_lock, False)  # unlock param change
+    select_msg = String()
     while selected < 0:
         if rospy.has_param(param_control_user_selected):
             selected = rospy.get_param(param_control_user_selected)
-        if num >= selected > 0:
-            info_msg.data = 'User has selected target No.' + str(selected)
-            pubInfo.publish(info_msg)
-            break
-        elif selected == 0:
-            info_msg.data = 'No target selected.'
-            pubInfo.publish(info_msg)
-            break
-        else:
-            selected = -1
+            if num >= selected > 0:
+                select_msg.data = 'User has selected target No.' + str(selected)
+                print select_msg.data
+                pubInfo.publish(select_msg)
+                break
+            elif selected == 0:
+                select_msg.data = 'No target selected.'
+                print select_msg.data
+                pubInfo.publish(select_msg)
+                break
+            else:
+                selected = -1
 
     rsp = user_selectResponse()
     rsp.selected_id = int(selected)

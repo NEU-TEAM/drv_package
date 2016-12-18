@@ -139,7 +139,6 @@ void searchCallback(const std_msgs::Int8ConstPtr &msg)
                 }
             else
                 {
-                    pubInfo("Searching found the " + targetLabel_);
                     foundTarget_ = true;
                     ros::param::set(param_vision_feedback_search, 1);
                     ros::param::set(param_vision_feedback, 1);
@@ -294,8 +293,7 @@ int main(int argc, char **argv)
 								{
 										if (isTargetSet_)
 												{
-														string s = "Target set to be '" + targetLabel_ + "'.";
-														pubInfo(s);
+														pubInfo("Target set to be '" + targetLabel_ + "'.");
 												}
 										else
 												{

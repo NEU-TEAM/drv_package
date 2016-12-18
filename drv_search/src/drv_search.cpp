@@ -29,7 +29,7 @@ ros::Publisher searchPubTarget_; // publish target info to track function
 //image_transport::Publisher searchPubImage_; // publish labeled image for user judgement
 
 enum ModeType{m_wander, m_search, m_track};
-int modeType_ = m_wander;
+int modeType_ = m_wander; // record current mode status
 string param_running_mode = "/status/running_mode";
 
 
@@ -45,6 +45,9 @@ string targetLabel_;
 bool servoInitialized_ = false;
 int searchResult_ = 0; // feedback, -1 indicate no result around, 0 indicate current no result, 1 has result
 int selectedNum_ = 0; // selected target number
+
+// main lock to prevent search run twice when successed
+bool lock_ = false;
 
 sensor_msgs::Image img_msg_;
 
@@ -129,8 +132,17 @@ int main(int argc, char **argv)
 
 						if (modeType_ != m_search)
 								{
+										if (lock_) {lock_ = false;}
 										resetStatus();
 										continue;
+								}
+						else
+								{
+										if (lock_)
+												{
+														resetStatus();
+														continue;
+												}
 								}
 
 						// get the servo pitch to standard pose for every search
@@ -160,8 +172,8 @@ int main(int argc, char **argv)
 
 						if (client.call(srv))
 								{
-										if (!searchResult_)
-												{
+//										if (!searchResult_)
+//												{
 														cv_bridge::CvImagePtr img_labeled;
 														selectedNum_ = ts.select(targetLabel_, srv.response, img_msg_, img_labeled, choosed_id);
 
@@ -173,9 +185,9 @@ int main(int argc, char **argv)
 																		searchResult_ = 1;
 														else
 																		searchResult_ = 0;
-												}
-										else
-												ROS_WARN("Search has been done.");
+//												}
+//										else
+//												ROS_WARN("Search has been done.");
 								}
 						else
 								{
@@ -194,7 +206,7 @@ int main(int argc, char **argv)
 
 										if (!has_next_pos)
 												{
-														ROS_WARN("Searching around didn't find target.\n");
+														// ROS_WARN("Searching around didn't find target.\n");
 														searchResult_ = -1;
 												}
 
@@ -214,8 +226,8 @@ int main(int argc, char **argv)
 														tgt.tgt_bbox_array = srv.response.obj_info.bbox_arrays[choosed_id];
 														tgt.label = srv.response.obj_info.labels[choosed_id];
 														searchPubTarget_.publish(tgt);
+														lock_ = true;
 												}
-										modeType_ = m_wander;
 								}
 
 						std_msgs::Int8 flag;

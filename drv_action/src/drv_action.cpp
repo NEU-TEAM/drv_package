@@ -10,7 +10,7 @@
 
 using namespace std;
 
-enum FeedbackType{f_wander, f_working, f_failed};
+enum FeedbackType{f_wander, f_working, f_failed, f_success};
 enum GoalType{g_none, g_object, g_face};
 
 class VisionAction
@@ -49,7 +49,7 @@ public:
         sub_face_ = nh_.subscribe<drv_msgs::recognized_faces>("face/recognized_faces", 1, &VisionAction::faceCB, this);
         sub_object_ = nh_.subscribe<geometry_msgs::PoseStamped>("grasp/pose", 1, &VisionAction::objectCB, this);
 
-        pub_info_ = nh_.advertise<std_msgs::String>("/comm/msg/vision/info", 1);
+        pub_info_ = nh_.advertise<std_msgs::String>("/comm/msg/vision/mode", 1);
 
         trigger_ = false;
         as_.start();
@@ -84,6 +84,7 @@ public:
 
     void goalCB()
     {
+        resetStatus(); // clear the way for action goal
         goal_ = as_.acceptNewGoal();
         goal_mode_ = goal_->mode;
         target_label_ = goal_->target_label;
@@ -119,6 +120,9 @@ public:
             }
         else
             {
+                if (status_feedback_ != f_success)
+                    return;
+
                 result_.ids = face->name_ids;
                 result_.names = face->names;
                 pubInfo("Vision Action: Face recognition succeeded.");
@@ -133,13 +137,13 @@ public:
 
     void objectCB(const geometry_msgs::PoseStampedConstPtr &ps)
     {
+        getStatus();
         if (!as_.isActive() || goal_mode_ !=  g_object || !trigger_)
             return;
 
         if (ps->pose.position.z == 0)
             return;
 
-        getStatus();
         if (status_feedback_ == f_failed)
             {
                 pubInfo("Vision Action: Failed to find target in current scene!");
@@ -147,8 +151,21 @@ public:
             }
         else
             {
-                result_.target_pose.header = ps->header;
-                result_.target_pose.pose = ps->pose;
+                if (status_feedback_ != f_success)
+                    return;
+
+                geometry_msgs::Pose p;
+                p.position.x = 10;
+                p.position.y = 0;
+                p.position.z = 0;
+                p.orientation.x = 0;
+                p.orientation.y = 0;
+                p.orientation.z = 0;
+                p.orientation.w = 1;
+                result_.target_pose.pose = p;
+
+//                result_.target_pose.header = ps->header;
+//                result_.target_pose.pose = ps->pose;
                 pubInfo("Vision Action: Object recognition succeeded.");
                 as_.setSucceeded(result_);
             }
