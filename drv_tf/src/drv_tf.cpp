@@ -20,7 +20,7 @@
 
 #include "movemean.h"
 
-//#define DEBUG_TRANS
+#define DEBUG_TRANS
 
 // camera frame rotation about world frame
 float pitch_ = 0.0; // rotation angle -90 between camera optical frame and link is not included
@@ -40,8 +40,8 @@ float dx_pitch_to_yaw = 0.019;
 float dy_pitch_to_yaw = 0;
 float dz_pitch_to_yaw = 0.0773;
 
-float dx_yaw_to_base = 0;
-float dy_yaw_to_base = 0;
+double dx_yaw_to_base_ = 0.0;
+double dy_yaw_to_base_ = 0.0;
 double dz_yaw_to_base_ = 1.1;
 
 
@@ -63,9 +63,10 @@ MoveMean mm(50); // the value indicate the strengh to stable the camera.
 
 void configCallback(drv_tf::tfConfig &config, uint32_t level)
 {
-    ROS_INFO("Reconfigure Request: offset: %d, height: %f.\n", config.camera_pitch_offset_cfg, config.ground_to_base_height_cfg);
     pitch_offset_ = config.camera_pitch_offset_cfg;
-    dz_yaw_to_base_ = config.ground_to_base_height_cfg;
+    dz_yaw_to_base_ = config.camera_to_base_height_cfg;
+    dx_yaw_to_base_ = config.camera_to_base_x_cfg;
+    dy_yaw_to_base_ = config.camera_to_base_y_cfg;
 }
 
 void servoCallback(const std_msgs::UInt16MultiArrayConstPtr &msg)
@@ -154,8 +155,8 @@ void tfCallback(const std_msgs::HeaderConstPtr & msg)
 #endif
 		transformStamped4.child_frame_id = cameraYawFrameID_;
 
-		transformStamped4.transform.translation.x = dx_yaw_to_base;
-		transformStamped4.transform.translation.y = dy_yaw_to_base;
+		transformStamped4.transform.translation.x = dx_yaw_to_base_;
+		transformStamped4.transform.translation.y = dy_yaw_to_base_;
 		transformStamped4.transform.translation.z = dz_yaw_to_base_;
 		tf2::Quaternion q4;
 		q4.setRPY(0 , 0, 0);
@@ -188,7 +189,7 @@ int main(int argc, char** argv){
 		ros::Subscriber sub_acc = nh.subscribe(visionNameSpaceID_ + "/camera_pitch", 3, imuCallback);
 		ros::Subscriber sub = nh.subscribe<std_msgs::Header>("point_cloud/header", 3, tfCallback);
 
-		 ROS_INFO("TF initialized.\n");
+		 ROS_INFO("TF initialized.");
 
     while (ros::ok())
         {

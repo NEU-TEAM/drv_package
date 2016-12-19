@@ -95,19 +95,19 @@ int main(int argc, char **argv)
 		ros::NodeHandle nh;
 		ros::NodeHandle pnh;
 		ros::NodeHandle rgb_nh(nh, "rgb");
-//		ros::NodeHandle depth_nh(nh, "depth");
+		//		ros::NodeHandle depth_nh(nh, "depth");
 		ros::NodeHandle rgb_pnh(pnh, "rgb");
-//		ros::NodeHandle depth_pnh(pnh, "depth");
+		//		ros::NodeHandle depth_pnh(pnh, "depth");
 		image_transport::ImageTransport it_rgb_sub(rgb_nh);
-//		image_transport::ImageTransport depth_it(depth_nh);
+		//		image_transport::ImageTransport depth_it(depth_nh);
 		image_transport::TransportHints hints_rgb("compressed", ros::TransportHints(), rgb_pnh);
 
 		searchPubStatus_ = nh.advertise<std_msgs::Int8>("status/search/feedback", 1);
 		searchPubTarget_ = nh.advertise<drv_msgs::recognized_target>("search/recognized_target", 1, true);
 
-//		ros::Subscriber sub_rgb = nh.subscribe("/rgb/image/compressed", 1, imageCallback);
+		//		ros::Subscriber sub_rgb = nh.subscribe("/rgb/image/compressed", 1, imageCallback);
 		image_transport::Subscriber sub_rgb = it_rgb_sub.subscribe("/rgb/image", 1, imageCallback, hints_rgb);
-//		ros::Subscriber sub_depth = nh.subscribe("/depth/image_raw", 1, depthCallback );
+		//		ros::Subscriber sub_depth = nh.subscribe("/depth/image_raw", 1, depthCallback );
 
 		ros::ServiceClient client = nh.serviceClient<drv_msgs::recognize>("drv_recognize");
 
@@ -116,8 +116,8 @@ int main(int argc, char **argv)
 		Search sh;
 		TargetSelect ts;
 		SmoothServo ss;
-//		Segment sg;
-//		Utilities ut;
+		//		Segment sg;
+		//		Utilities ut;
 
 		while (ros::ok())
 				{
@@ -170,24 +170,20 @@ int main(int argc, char **argv)
 						std::vector<std_msgs::UInt16MultiArray> bbox_arrays_;
 						int choosed_id = -1;
 
+						// call object recognize service
 						if (client.call(srv))
 								{
-//										if (!searchResult_)
-//												{
-														cv_bridge::CvImagePtr img_labeled;
-														selectedNum_ = ts.select(targetLabel_, srv.response, img_msg_, img_labeled, choosed_id);
+										cv_bridge::CvImagePtr img_labeled;
+										selectedNum_ = ts.select(targetLabel_, srv.response, img_msg_, img_labeled, choosed_id);
 
-														int a_s = srv.response.obj_info.bbox_arrays.size();
-														bbox_arrays_.resize(a_s);
-														bbox_arrays_ = srv.response.obj_info.bbox_arrays;
+										int a_s = srv.response.obj_info.bbox_arrays.size();
+										bbox_arrays_.resize(a_s);
+										bbox_arrays_ = srv.response.obj_info.bbox_arrays;
 
-														if (selectedNum_)
-																		searchResult_ = 1;
-														else
-																		searchResult_ = 0;
-//												}
-//										else
-//												ROS_WARN("Search has been done.");
+										if (selectedNum_)
+												searchResult_ = 1;
+										else
+												searchResult_ = 0;
 								}
 						else
 								{
@@ -202,11 +198,10 @@ int main(int argc, char **argv)
 										int pitch_angle = pitchAngle_;
 										int yaw_angle = yawAngle_;
 										bool has_next_pos = sh.getNextPosition(yaw_angle, pitch_angle);
-										ROS_INFO("Searching at angle: yaw = %d, pitch = %d.\n", yaw_angle, pitch_angle);
+										ROS_INFO("Search angle: yaw = %d, pitch = %d.\n", yaw_angle, pitch_angle);
 
 										if (!has_next_pos)
 												{
-														// ROS_WARN("Searching around didn't find target.\n");
 														searchResult_ = -1;
 												}
 
@@ -216,7 +211,7 @@ int main(int argc, char **argv)
 						else
 								{
 										// label the detected target with bounding area
-//										sg.segment(imagePtr_, depthPtr_);
+										//										sg.segment(imagePtr_, depthPtr_);
 
 										// publish goal info for tracking
 										if (srv.response.obj_info.bbox_arrays.size() > choosed_id)

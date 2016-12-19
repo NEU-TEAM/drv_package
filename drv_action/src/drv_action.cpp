@@ -28,7 +28,8 @@ protected:
     drv_msgs::VisionResult result_;
 
     ros::Subscriber sub_face_;
-    ros::Subscriber sub_object_;
+    ros::Subscriber sub_object_pose_;
+    ros::Subscriber sub_object_location_;
     ros::Publisher pub_info_;
 
 public:
@@ -47,7 +48,9 @@ public:
         as_.registerPreemptCallback(boost::bind(&VisionAction::preemptCB, this));
 
         sub_face_ = nh_.subscribe<drv_msgs::recognized_faces>("face/recognized_faces", 1, &VisionAction::faceCB, this);
-        sub_object_ = nh_.subscribe<geometry_msgs::PoseStamped>("grasp/pose", 1, &VisionAction::objectCB, this);
+        // the sub order should be the same with the order that msg published
+        sub_object_location_ = nh_.subscribe<geometry_msgs::PoseStamped>("grasp/location", 1, &VisionAction::objectLocationCB, this);
+        sub_object_pose_ = nh_.subscribe<geometry_msgs::PoseStamped>("grasp/pose", 1, &VisionAction::objectCB, this);
 
         pub_info_ = nh_.advertise<std_msgs::String>("/comm/msg/vision/mode", 1);
 
@@ -128,11 +131,19 @@ public:
                 pubInfo("Vision Action: Face recognition succeeded.");
 
                 if (face->names.empty())
-                        pubInfo("Vision Action: Did not find face in current scene.");
+                    pubInfo("Vision Action: Did not find face in current scene.");
 
                 as_.setSucceeded(result_);
             }
         resetStatus();
+    }
+
+    void objectLocationCB(const geometry_msgs::PoseStampedConstPtr &lo)
+    {
+        if (!as_.isActive() || goal_mode_ !=  g_object || !trigger_)
+            return;
+        location_.header = lo->header;
+        location_.pose = lo->pose;
     }
 
     void objectCB(const geometry_msgs::PoseStampedConstPtr &ps)
@@ -154,18 +165,11 @@ public:
                 if (status_feedback_ != f_success)
                     return;
 
-                geometry_msgs::Pose p;
-                p.position.x = 10;
-                p.position.y = 0;
-                p.position.z = 0;
-                p.orientation.x = 0;
-                p.orientation.y = 0;
-                p.orientation.z = 0;
-                p.orientation.w = 1;
-                result_.target_pose.pose = p;
+                result_.target_pose.header = ps->header;
+                result_.target_pose.pose = ps->pose;
 
-//                result_.target_pose.header = ps->header;
-//                result_.target_pose.pose = ps->pose;
+                result_.target_location = location_;
+
                 pubInfo("Vision Action: Object recognition succeeded.");
                 as_.setSucceeded(result_);
             }
@@ -173,7 +177,7 @@ public:
     }
 
 private:
-    // main switch
+    // main switch, true if the goal has been received
     bool trigger_;
 
     // goal
@@ -184,6 +188,9 @@ private:
     // overall feedback
     int status_feedback_;
     string param_vision_feedback;
+
+    // result
+    geometry_msgs::PoseStamped location_;
 };
 
 

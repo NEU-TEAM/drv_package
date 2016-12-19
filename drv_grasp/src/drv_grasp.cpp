@@ -43,6 +43,7 @@ ros::Publisher graspPubMarker_;
 ros::Publisher graspPubStatus_;
 ros::Publisher graspPubCloud_;
 ros::Publisher graspPubPose_;
+ros::Publisher graspPubLocation_;
 
 enum ModeType{m_wander, m_search, m_track};
 int modeType_ = m_wander;
@@ -64,9 +65,11 @@ pcl::PointIndices::Ptr inliers_(new pcl::PointIndices);
 uint32_t shape = visualization_msgs::Marker::ARROW;
 
 // transform frame
-string targetFrame_ = "camera_yaw_frame";
-string sourceFrame_ = "openni_rgb_optical_frame";
-geometry_msgs::TransformStamped transformStamped_;
+string camera_base_frame_ = "camera_yaw_frame";
+string camera_optical_frame_ = "openni_rgb_optical_frame";
+string target_location_frame_ = "map";
+geometry_msgs::TransformStamped trans_c_;
+geometry_msgs::TransformStamped trans_m_;
 
 
 void getCloudByInliers(PointCloud::Ptr cloud_in, PointCloud::Ptr &cloud_out,
@@ -182,15 +185,18 @@ void cloudCallback(const PointCloud::ConstPtr& msg)
 #endif
 
     MakePlan MP;
-    pcl::PointXYZRGB avrPt;
+    pcl::PointXYZRGB graspPt; // in robot's frame
+    pcl::PointXYZRGB locationPt; // in map frame
 
 #ifdef USE_CENTER
     pcl::PointXYZRGB p_in = msg->points[idx_];
     if (isnan(p_in.x) || isnan(p_in.y) || isnan(p_in.z))
         hasGraspPlan_ = false;
-    else {
-            doTransform(p_in, avrPt, transformStamped_);
-            hasGraspPlan_ = MP.smartOffset(avrPt, 0.02);
+    else
+        {
+            doTransform(p_in, graspPt, trans_c_);
+            doTransform(p_in, locationPt, trans_m_);
+            hasGraspPlan_ = MP.smartOffset(graspPt, 0.02);
         }
 #else
     PointCloud::Ptr cloud_in (new PointCloud());
@@ -210,15 +216,14 @@ void cloudCallback(const PointCloud::ConstPtr& msg)
     cloud_ts->header.frame_id = targetFrame_;
     graspPubCloud_.publish(*cloud_ts);
 
-    hasGraspPlan_ = MP.process(cloud_ts, pa_, pb_, pc_, pd_, avrPt);
+    hasGraspPlan_ = MP.process(cloud_ts, pa_, pb_, pc_, pd_, graspPt);
 #endif
 
     if (hasGraspPlan_)
         {
-            geometry_msgs::PoseStamped ps;
             visualization_msgs::Marker marker;
             // Set the frame ID and timestamp.  See the TF tutorials for information on these.
-            marker.header.frame_id = targetFrame_;
+            marker.header.frame_id = camera_base_frame_;
             marker.header.stamp = pcl_conversions::fromPCL(msg->header.stamp);
 
             // Set the namespace and id for this marker.  This serves to create a unique ID
@@ -231,34 +236,21 @@ void cloudCallback(const PointCloud::ConstPtr& msg)
 
             // Set the pose of the marker.  This is a full 6DOF pose relative to the frame/time specified in the header
             marker.points.resize(2);
-
-            marker.points[0].x = avrPt.x;
-            marker.points[0].y = avrPt.y;
-            marker.points[0].z = avrPt.z;
-
-            marker.points[1].x = avrPt.x;
-            marker.points[1].y = avrPt.y;
-            marker.points[1].z = avrPt.z + 0.15; // arrow height = 0.15m
-
-            ps.header = marker.header;
-            ps.pose.position.x = avrPt.x;
-            ps.pose.position.y = avrPt.y;
-            ps.pose.position.z = avrPt.z;
-            ps.pose.orientation.w = sqrt(0.5); // to rotate x axis to z axis, so the rotation angle = -90 deg
-            ps.pose.orientation.x = 0;
-            ps.pose.orientation.y = -sqrt(0.5);
-            ps.pose.orientation.z = 0;
-
-            // if we use pose and scale to represent the arrow, remember the original direction is along x axis
-//            marker.scale.x = 0.1;
-//            marker.scale.y = 0.01;
-//            marker.scale.z = 0.01;
-//            marker.pose = ps.pose;
-
-            graspPubPose_.publish(ps);
-
             // The point at index 0 is assumed to be the start point, and the point at index 1 is assumed to be the end.
+            marker.points[0].x = graspPt.x;
+            marker.points[0].y = graspPt.y;
+            marker.points[0].z = graspPt.z;
 
+            marker.points[1].x = graspPt.x;
+            marker.points[1].y = graspPt.y;
+            marker.points[1].z = graspPt.z + 0.15; // arrow height = 0.15m
+            /*
+             if we use pose and scale to represent the arrow, remember the original direction is along x axis
+             marker.scale.x = 0.1;
+             marker.scale.y = 0.01;
+             marker.scale.z = 0.01;
+             marker.pose = ps.pose;
+            */
             // scale.x is the shaft diameter, and scale.y is the head diameter. If scale.z is not zero, it specifies the head length.
             // Set the scale of the marker -- 1x1x1 here means 1m on a side
             marker.scale.x = 0.01;
@@ -272,6 +264,29 @@ void cloudCallback(const PointCloud::ConstPtr& msg)
             marker.color.a = 1.0;
 
             graspPubMarker_.publish(marker);
+
+            geometry_msgs::PoseStamped location_ps;
+            location_ps.header.frame_id = "/map";
+            location_ps.header.stamp = marker.header.stamp;
+            location_ps.pose.position.x = locationPt.x;
+            location_ps.pose.position.y = locationPt.y;
+            location_ps.pose.position.z = locationPt.z;
+            location_ps.pose.orientation.w = 1; // to rotate x axis to z axis, so the rotation angle = -90 deg
+            location_ps.pose.orientation.x = 0;
+            location_ps.pose.orientation.y = 0;
+            location_ps.pose.orientation.z = 0;
+            graspPubLocation_.publish(location_ps);
+
+            geometry_msgs::PoseStamped grasp_ps;
+            grasp_ps.header = marker.header;
+            grasp_ps.pose.position.x = graspPt.x;
+            grasp_ps.pose.position.y = graspPt.y;
+            grasp_ps.pose.position.z = graspPt.z;
+            grasp_ps.pose.orientation.w = sqrt(0.5); // to rotate x axis to z axis, so the rotation angle = -90 deg
+            grasp_ps.pose.orientation.x = 0;
+            grasp_ps.pose.orientation.y = -sqrt(0.5);
+            grasp_ps.pose.orientation.z = 0;
+            graspPubPose_.publish(grasp_ps);
         }
     else
         {
@@ -289,6 +304,7 @@ int main(int argc, char **argv)
     graspPubStatus_ = nh.advertise<std_msgs::Bool>("status/grasp/feedback", 1);
     graspPubCloud_ = nh.advertise<sensor_msgs::PointCloud2>("grasp/pointcloud", 1);
     graspPubPose_ = nh.advertise<geometry_msgs::PoseStamped>("grasp/pose", 1);
+    graspPubLocation_ = nh.advertise<geometry_msgs::PoseStamped>("grasp/location", 1);
 
     tf2_ros::Buffer tfBuffer_;
     tf2_ros::TransformListener tfListener_(tfBuffer_);
@@ -296,7 +312,7 @@ int main(int argc, char **argv)
     ros::Subscriber sub_track = nh.subscribe<drv_msgs::recognized_target>("track/recognized_target", 1, trackResultCallback);
     ros::Subscriber sub_clouds = nh.subscribe<PointCloud>("/point_cloud", 1, cloudCallback);
 
-    ROS_INFO("Grasping plan function initialized!\n");
+    ROS_INFO("Grasp planning function initialized!\n");
 
     while (ros::ok())
         {
@@ -313,7 +329,9 @@ int main(int argc, char **argv)
 
             try
             {
-                transformStamped_ = tfBuffer_.lookupTransform(targetFrame_, sourceFrame_, ros::Time(0));
+                // the first frame is the target frame
+                trans_c_ = tfBuffer_.lookupTransform(camera_base_frame_, camera_optical_frame_, ros::Time(0));
+                trans_m_ = tfBuffer_.lookupTransform(target_location_frame_, camera_optical_frame_, ros::Time(0));
             }
             catch (tf2::TransformException &ex)
             {
