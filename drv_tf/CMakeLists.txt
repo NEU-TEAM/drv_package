@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   drv_msgs
   dynamic_reconfigure
   geometry_msgs
+  image_transport
   pcl_ros
   roscpp
   rospy
