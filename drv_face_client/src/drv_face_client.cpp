@@ -89,7 +89,7 @@ void drawText(Mat &img, vector<Rect> face_roi, vector<std_msgs::String> names)
 bool loadNames()
 {
     ifstream name_file;
-    name_file.open ("/home/aicrobo/caffe/data/neu_face/names.txt");
+    name_file.open("/home/aicrobo/catkin_ws/src/drv_package/supplements/neu_face/names.txt");
 
     names.push_back("Unknown");
     string line;
