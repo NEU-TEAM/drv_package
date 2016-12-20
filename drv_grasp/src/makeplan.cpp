@@ -39,13 +39,12 @@ bool MakePlan::getAveragePoint(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_in, 
     return true;
 }
 
-bool MakePlan::smartOffset(pcl::PointXYZRGB &p_in, float off_val)
+void MakePlan::smartOffset(pcl::PointXYZRGB &p_in, float off_val)
 {
     float y_off = off_val / sqrt(1 + pow(p_in.x / p_in.y, 2)) * p_in.y / fabs(p_in.y);
     float x_off = p_in.x / p_in.y * y_off;
     p_in.x = p_in.x + x_off;
     p_in.y = p_in.y + y_off;
-    return true;
 }
 
 void MakePlan::removeNans(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_in, pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud_out)

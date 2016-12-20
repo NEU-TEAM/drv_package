@@ -8,9 +8,7 @@
   <!-- camera optical frame -->
   <arg name="camera_frame" default="/openni_rgb_optical_frame"/>
 
-  <!-- start publishing pointcloud and then tf -->
-  <node name="drv_pointcloud" pkg="drv_pointcloud" type="drv_pointcloud" output="screen">
-  </node>
+  <!-- drv_pointcloud is no longer used -->
 
   <node name="drv_tf" pkg="drv_tf" type="drv_tf" output="screen">
     <remap from="/base_link_frame_id" to="$(arg base_link_frame)"/>
