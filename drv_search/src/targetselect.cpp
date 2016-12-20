@@ -68,7 +68,7 @@ int TargetSelect::callService(int num)
 						result = srv.response.selected_id;
 						if (result == 0)
 								{
-										ROS_INFO("You have comfirmed current scene have no target.");
+										ROS_INFO("You have confirmed current scene have no target.");
 								}
 						else
 								{

@@ -174,9 +174,7 @@ void cloudCallback(const PointCloud::ConstPtr& msg)
             return;
         }
 
-#ifdef USE_CENTER
-
-#else
+#ifndef USE_CENTER
     if (inliers_->indices.empty())
         {
             ROS_WARN_THROTTLE(5, "Object grasp plan has not been found.\n");
@@ -195,7 +193,7 @@ void cloudCallback(const PointCloud::ConstPtr& msg)
     else
         {
             doTransform(p_in, graspPt, trans_c_);
-            doTransform(p_in, locationPt, trans_m_);
+            // doTransform(p_in, locationPt, trans_m_);
             hasGraspPlan_ = MP.smartOffset(graspPt, 0.02);
         }
 #else
@@ -265,17 +263,17 @@ void cloudCallback(const PointCloud::ConstPtr& msg)
 
             graspPubMarker_.publish(marker);
 
-            geometry_msgs::PoseStamped location_ps;
-            location_ps.header.frame_id = "/map";
-            location_ps.header.stamp = marker.header.stamp;
-            location_ps.pose.position.x = locationPt.x;
-            location_ps.pose.position.y = locationPt.y;
-            location_ps.pose.position.z = locationPt.z;
-            location_ps.pose.orientation.w = 1; // to rotate x axis to z axis, so the rotation angle = -90 deg
-            location_ps.pose.orientation.x = 0;
-            location_ps.pose.orientation.y = 0;
-            location_ps.pose.orientation.z = 0;
-            graspPubLocation_.publish(location_ps);
+            // geometry_msgs::PoseStamped location_ps;
+            // location_ps.header.frame_id = "/map";
+            // location_ps.header.stamp = marker.header.stamp;
+            // location_ps.pose.position.x = locationPt.x;
+            // location_ps.pose.position.y = locationPt.y;
+            // location_ps.pose.position.z = locationPt.z;
+            // location_ps.pose.orientation.w = 1; // to rotate x axis to z axis, so the rotation angle = -90 deg
+            // location_ps.pose.orientation.x = 0;
+            // location_ps.pose.orientation.y = 0;
+            // location_ps.pose.orientation.z = 0;
+            // graspPubLocation_.publish(location_ps);
 
             geometry_msgs::PoseStamped grasp_ps;
             grasp_ps.header = marker.header;
@@ -306,8 +304,10 @@ int main(int argc, char **argv)
     graspPubPose_ = nh.advertise<geometry_msgs::PoseStamped>("grasp/pose", 1);
     graspPubLocation_ = nh.advertise<geometry_msgs::PoseStamped>("grasp/location", 1);
 
-    tf2_ros::Buffer tfBuffer_;
-    tf2_ros::TransformListener tfListener_(tfBuffer_);
+    tf2_ros::Buffer tfBufferC_;
+    tf2_ros::TransformListener tfListenerC_(tfBufferC_);
+    tf2_ros::Buffer tfBufferM_;
+    tf2_ros::TransformListener tfListenerM_(tfBufferM_);
 
     ros::Subscriber sub_track = nh.subscribe<drv_msgs::recognized_target>("track/recognized_target", 1, trackResultCallback);
     ros::Subscriber sub_clouds = nh.subscribe<PointCloud>("/point_cloud", 1, cloudCallback);
@@ -327,11 +327,14 @@ int main(int argc, char **argv)
             std_msgs::Bool flag;
             flag.data = true;
 
+            if (modeType_ != m_track)
+                continue;
+
             try
             {
                 // the first frame is the target frame
-                trans_c_ = tfBuffer_.lookupTransform(camera_base_frame_, camera_optical_frame_, ros::Time(0));
-                trans_m_ = tfBuffer_.lookupTransform(target_location_frame_, camera_optical_frame_, ros::Time(0));
+                trans_c_ = tfBufferC_.lookupTransform(camera_base_frame_, camera_optical_frame_, ros::Time(0));
+                // trans_m_ = tfBufferM_.lookupTransform(target_location_frame_, camera_optical_frame_, ros::Time(0));
             }
             catch (tf2::TransformException &ex)
             {

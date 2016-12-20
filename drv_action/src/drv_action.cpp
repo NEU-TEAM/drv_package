@@ -168,7 +168,9 @@ public:
                 result_.target_pose.header = ps->header;
                 result_.target_pose.pose = ps->pose;
 
-                result_.target_location = location_;
+                // result_.target_location = location_;
+                result_.target_location.pose.position = ps->pose.position;
+                result_.target_location.pose.orientation.w = 1;
 
                 pubInfo("Vision Action: Object recognition succeeded.");
                 as_.setSucceeded(result_);
