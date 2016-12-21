@@ -329,6 +329,7 @@ int main(int argc, char **argv)
 
 						// set mode
 						ros::param::set(param_running_mode, modeType_);
+
 						if (modeType_ != modeTypeTemp_)
 								{
 										std_msgs::String mode_msg;

@@ -61,6 +61,11 @@ void imageCallback(const sensor_msgs::ImageConstPtr & image_msg)
 				{
 						return;
 				}
+		if (image_msg->height != 480)
+				{
+						ROS_ERROR_THROTTLE(5,"RGB image size is wrong.");
+						return;
+				}
 
 		img_msg_ = *image_msg;
 		imagePtr_ = cv_bridge::toCvShare(image_msg, "bgr8");
@@ -86,6 +91,20 @@ void resetStatus()
 		servoInitialized_ = false;
 		searchResult_ = 0;
 		selectedNum_ = 0;
+}
+
+bool checkRunningMode()
+{
+		if (ros::param::has(param_running_mode))
+				ros::param::get(param_running_mode, modeType_);
+
+		if (modeType_ == m_search)
+				return true;
+		else
+				{
+						resetStatus();
+						return false;
+				}
 }
 
 int main(int argc, char **argv)
@@ -130,20 +149,8 @@ int main(int argc, char **argv)
 						if (ros::param::has(param_running_mode))
 								ros::param::get(param_running_mode, modeType_);
 
-						if (modeType_ != m_search)
-								{
-										if (lock_) {lock_ = false;}
-										resetStatus();
-										continue;
-								}
-						else
-								{
-										if (lock_)
-												{
-														resetStatus();
-														continue;
-												}
-								}
+						if (!checkRunningMode())
+								continue;
 
 						// get the servo pitch to standard pose for every search
 						if (!servoInitialized_)
@@ -161,10 +168,6 @@ int main(int argc, char **argv)
 
 						// call recognize service
 						drv_msgs::recognize srv;
-
-						if (img_msg_.height != 480)
-								continue;
-
 						srv.request.img_in = img_msg_;
 
 						std::vector<std_msgs::UInt16MultiArray> bbox_arrays_;
@@ -173,6 +176,10 @@ int main(int argc, char **argv)
 						// call object recognize service
 						if (client.call(srv))
 								{
+										// re-check the running mode, incase that mode didn't change quickly
+										if (!checkRunningMode())
+												continue;
+
 										cv_bridge::CvImagePtr img_labeled;
 										selectedNum_ = ts.select(targetLabel_, srv.response, img_msg_, img_labeled, choosed_id);
 

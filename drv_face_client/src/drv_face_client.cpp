@@ -48,7 +48,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr & image_msg)
 				return;
 
 		imagePtr_ = cv_bridge::toCvCopy(image_msg, "bgr8");
-		cv::imshow("s", imagePtr_->image);
 }
 
 void resetStatus()
@@ -116,17 +115,17 @@ int main(int argc, char **argv)
 		ros::NodeHandle rgb_pnh(pnh, "rgb");
 		image_transport::ImageTransport it_rgb_sub(rgb_nh);
 		image_transport::TransportHints hints_rgb("compressed", ros::TransportHints(), rgb_pnh);
-		image_transport::ImageTransport rgb_it(nh);
 
 		facePubStatus_ = nh.advertise<std_msgs::Bool>("status/face/feedback", 1);
 		facePubFace_ = nh.advertise<drv_msgs::recognized_faces>("face/recognized_faces", 1);
+		image_transport::ImageTransport rgb_it(nh);
 		facePubImage_ = rgb_it.advertise("search/labeled_image", 1);
 
-		image_transport::Subscriber sub_rgb = it_rgb_sub.subscribe("/rgb/image", 2, imageCallback);
+		image_transport::Subscriber sub_rgb = it_rgb_sub.subscribe("/rgb/image", 1, imageCallback, hints_rgb);
 
 		ros::ServiceClient client = nh.serviceClient<drv_msgs::face_recognize>("drv_face_service");
 
-		ROS_INFO("Face recognition function initialized!\n");
+		ROS_INFO("Face recognition function initialized!");
 
 		FaceDetector fd;
 		loadNames();

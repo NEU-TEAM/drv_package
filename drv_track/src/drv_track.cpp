@@ -104,7 +104,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image_msg)
 
     cv::Rect roi;
 
-    if (detection_.area() < 400)
+    if (detection_.area() < 20)
     {
         isInTracking_ = false;
         ROS_WARN("Target area in image is %d, too small to be tracked.\n", detection_.area());
@@ -197,12 +197,13 @@ int main(int argc, char **argv)
     //		ros::NodeHandle depth_nh(nh, "depth");
     ros::NodeHandle rgb_pnh(pnh, "rgb");
     //		ros::NodeHandle depth_pnh(pnh, "depth");
-    image_transport::ImageTransport it_rgb_pub(nh);
+
     image_transport::ImageTransport it_rgb_sub(rgb_nh);
     //		image_transport::ImageTransport depth_it(depth_nh);
     image_transport::TransportHints hints_rgb("compressed", ros::TransportHints(), rgb_pnh);
 
-    trackPubImage_ = it_rgb_pub.advertise("track/image", 1);
+    image_transport::ImageTransport it_rgb_pub(nh);
+    trackPubImage_ = it_rgb_pub.advertise("search/labeled_image", 1);
     trackPubServo_ = nh.advertise<std_msgs::UInt16MultiArray>("/vision/servo", 1);
     trackPubStatus_ = nh.advertise<std_msgs::Bool>("status/track/feedback", 1);
     trackPubTarget_ = nh.advertise<drv_msgs::recognized_target>("track/recognized_target" , 1);
