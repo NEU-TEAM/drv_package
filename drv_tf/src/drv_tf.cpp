@@ -43,12 +43,12 @@ float dx_pitch_to_yaw = 0.019;
 float dy_pitch_to_yaw = 0;
 float dz_pitch_to_yaw = 0.0773;
 
-double dx_yaw_to_base_ = 0.0;
+double dx_yaw_to_base_ = 0.01;
 double dy_yaw_to_base_ = 0.0;
-double dz_yaw_to_base_ = 1.1;
+double dz_yaw_to_base_ = 1.002;
 
 
-float pitch_offset_ = 101; // offset for pitch which was got from IMU
+float pitch_offset_ = 93; // offset for pitch which was got from IMU
 
 int servoPitch_ = 0; // judge if the servo pitch value is changing
 
@@ -64,8 +64,8 @@ MoveMean mm(50); // the value indicate the strengh to stable the camera.
 
 void configCallback(drv_tf::tfConfig &config, uint32_t level)
 {
-    pitch_offset_ = config.camera_pitch_offset_cfg;
-    dz_yaw_to_base_ = config.camera_to_base_height_cfg;
+//    pitch_offset_ = config.camera_pitch_offset_cfg;
+//    dz_yaw_to_base_ = config.camera_to_base_height_cfg;
     dx_yaw_to_base_ = config.camera_to_base_x_cfg;
     dy_yaw_to_base_ = config.camera_to_base_y_cfg;
 }

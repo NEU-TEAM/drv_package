@@ -42,7 +42,7 @@
   </node>
 
   <!-- initialize face recognition service -->
-  <node name="drv_face_service" pkg="drv_face_service" type="drv_face_service.py" output="screen">
+  <node name="drv_face_service" pkg="drv_face_service" type="drv_face_service" output="screen">
     <param name="face_likehood_threshold" value="0.9"/>
   </node>
 

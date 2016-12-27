@@ -1,6 +1,6 @@
 <launch>
   <!-- camera used, can be openni2_camera (ASUS Xtion Pro) or astra_camera -->
-  <arg name="camera_type" default="openni2_camera"/>
+  <arg name="camera_type" default="astra_camera"/>
 
   <arg name="vision_namespace_id" default="vision"/>
 
