@@ -4,13 +4,17 @@ Deep Robot Vision system for NEU household service robot
 ### 1.1 ROS
 We run this package in **indigo**, other versions of ROS may not be supported.
 ### 1.2 Caffe
-We use Caffe to implement our tracking and searching methods. More specifically, the tracking method (GOTURN) use original Caffe, while the searching method (Faster RCNN) use customized Caffe. To install original Caffe, refer <http://caffe.berkeleyvision.org/installation.html> and follow the 'CMake Build' instruction, as for the caffe-faster-rcnn, refer 1.2.
+We use Caffe to implement our tracking and searching methods. More specifically, 
+the tracking method (GOTURN) use original Caffe, while the searching method (Faster RCNN) use customized Caffe. 
+To install original Caffe, refer <http://caffe.berkeleyvision.org/installation.html> and follow the 'CMake Build' instruction, as for the caffe-faster-rcnn, refer 1.2.
 ### 1.3 py-faster-rcnn
-This package is not included in the drv_package, you need to get it from <https://github.com/rbgirshick/py-faster-rcnn>, and change the 8th line in file 'process.py' according to where you installed the py-faster-rcnn. The pre-trained model is also needed.
+This package is not included in the drv_package, you need to get it from <https://github.com/rbgirshick/py-faster-rcnn>, 
+and change the 8th line in file 'process.py' according to where you installed the py-faster-rcnn. The pre-trained model is also needed,
+by default, we have *faster_rcnn_test.pt* in $PY_FASTER_CNN/models/pascal_voc/VGG16/faster_rcnn_alt_opt/ and *VGG16_faster_rcnn_final.caffemodel* in $PY_FASTER_CNN/data/faster_rcnn_models/.
 ### 1.4 rosserial
-Please refer the site <http://wiki.ros.org/rosserial> for using rosserial. We use **rosserial_arduino** to communicate with one Arduino Uno board (may change to Mega 2560 in near future) and an ADXL345 3-axis accelerator. The Arduino is used to control 2 servos, one for pitching the RGBD-camera (ASUS Xtion Pro) and the other for rotating it. The accelerator is used to get the pitch and yaw angles of the camera. The .ino file which is loaded on the Arduino board is provided in folder *$DRV_DIR/supplements/arduino_control*, you can load it to your board with Arduino IDE <http://arduino.cc/en/Main/Software>.  
-### 1.5 openni_camera or astra_camera
-Install openni_camera from binary is recommended. The astra_camera is also supported. You can find the calibration files we use in folder *$DRV_DIR/supplements/camera_info* for reference purpose. When running in ROS, this folder should be put in */.ros*.
+Please refer the site <http://wiki.ros.org/rosserial_arduino/Tutorials/Arduino%20IDE%20Setup> for using rosserial. We use **rosserial_arduino** to communicate between one Arduino Uno board (may change to Mega 2560 in near future) and an ADXL345 3-axis accelerator. The Arduino controls 2 servos, one for pitching the RGBD-camera (ASUS Xtion Pro or ASTRA) and the other for rotating it. The accelerator measures the pitch and yaw angles of the camera. The .ino file loaded on the Arduino board is provided in folder *$DRV_DIR/supplements/arduino_control*, you can load it to your board with Arduino IDE <http://arduino.cc/en/Main/Software>.
+### 1.5 astra_camera or openni_camera
+Using astra_camera is recommended. Install openni_camera from binary is also supported. You can find the calibration files for our device in folder *$DRV_DIR/supplements/camera_info* for reference purpose. When running in ROS, this folder should be put into */.ros*.
 ### 1.6 GOTURN
 While GOTURN itself is not necessary to be compiled to run this program, we still need the trained model tracker.caffemodel to be put in /home/aicrobo/GOTURN/nets/models/pretrained_model. You can get GOTURN form <https://github.com/davheld/GOTURN>. If your route to the caffemodel is different from above, you need to modify the route declarations in **drv_track.cpp** which is in folder *$DRV_DIR/drv_track*.
 

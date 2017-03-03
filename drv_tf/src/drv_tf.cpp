@@ -24,6 +24,7 @@
 #include "movemean.h"
 
 //#define DEBUG_TRANS
+#define ASTRA
 
 // camera frame rotation about world frame
 float pitch_ = 0.0; // rotation angle -90 between camera optical frame and link is not included
@@ -31,12 +32,22 @@ float yaw_ = 0.0;
 
 
 // distance between frame orign, in meter
+#ifdef ASTRA // use astra s
+float dx_optic_to_link = 0.02;
+float dy_optic_to_link = 0.01025;
+float dz_optic_to_link = 0.035;
+#else // use xtion
 float dx_optic_to_link = 0;
 float dy_optic_to_link = 0.01;
 float dz_optic_to_link = 0.02;
+#endif
 
 float dx_link_to_pitch = 0;
+#ifdef ASTRA
+float dy_link_to_pitch = 0.0125;
+#else
 float dy_link_to_pitch = 0.00375;
+#endif
 float dz_link_to_pitch = 0.027;
 
 float dx_pitch_to_yaw = 0.019;

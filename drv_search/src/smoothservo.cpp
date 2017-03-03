@@ -2,7 +2,7 @@
 
 SmoothServo::SmoothServo()
 {
-    pitch_temp = 70;
+    pitch_temp = 50;
     yaw_temp = 90;
     step = 1; // minium step for single move
     servoPubSearch_ = nh.advertise<std_msgs::UInt16MultiArray>("/vision/servo", 1);

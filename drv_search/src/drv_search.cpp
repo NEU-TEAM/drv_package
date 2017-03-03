@@ -37,7 +37,7 @@ string param_running_mode = "/status/running_mode";
 string param_servo_pitch = "/status/servo/pitch";
 string param_servo_yaw = "/status/servo/yaw";
 int yawAngle_ = 90;
-int pitchAngle_ = 70;
+int pitchAngle_ = 50;
 
 string targetLabel_;
 
@@ -156,8 +156,8 @@ int main(int argc, char **argv)
 						if (!servoInitialized_)
 								{
 										ss.getCurrentServoAngle(pitchAngle_, yawAngle_);
-										ss.moveServoTo(70, yawAngle_);
-										pitchAngle_ = 70;
+										ss.moveServoTo(50, yawAngle_);
+										pitchAngle_ = 50;
 										servoInitialized_ = true;
 								}
 
