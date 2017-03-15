@@ -23,8 +23,8 @@ CLASSES = ('__background__',
 
 def process(im):
     cfg.TEST.HAS_RPN = True  # Use RPN for proposals
-    prototxt = '/home/aicrobo/py-faster-rcnn/models/pascal_voc/VGG16/faster_rcnn_alt_opt/faster_rcnn_test.pt'
-    caffemodel = '/home/aicrobo/py-faster-rcnn/data/faster_rcnn_models/VGG16_faster_rcnn_final.caffemodel'
+    prototxt = '/home/aicrobo/py-faster-rcnn/models/DRV/faster_rcnn_alt_opt/faster_rcnn_test.pt'
+    caffemodel = '/home/aicrobo/py-faster-rcnn/models/DRV/VGG16_faster_rcnn_final.caffemodel'
 
     use_gpu = True
     if use_gpu:
