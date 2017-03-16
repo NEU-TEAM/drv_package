@@ -21,7 +21,7 @@ public:
 private:
     void detectAndDraw(Mat img_in, Mat& img_out, CascadeClassifier& cascade, CascadeClassifier& nestedCascade, double scale, bool tryflip , vector<Rect> &face_roi);
     void getFaceFromRoi(Mat img_in, vector<Rect> face_roi, vector<Mat> &face_imgs);
-    void trySquareRoi(Mat img_in, Rect face_roi, Rect &square_roi);
+    bool trySquareRoi(Mat img_in, Rect face_roi, Rect &square_roi);
 };
 
 #endif // FACEDETECTOR_H

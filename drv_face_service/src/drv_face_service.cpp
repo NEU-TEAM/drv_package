@@ -2,10 +2,16 @@
 #include <cv_bridge/cv_bridge.h>
 #include <drv_msgs/face_recognize.h>
 
+#include <cstdlib>
+
 #include "processface.h"
 
-std::string prototxt = "/home/aicrobo/caffe/models/finetune_neu_face/neu_face_deploy.prototxt";
-std::string caffemodel = "/home/aicrobo/caffe/models/finetune_neu_face/finetune_neu_face.caffemodel";
+char* caffe_path_env = std::getenv("Caffe_DIR");
+
+std::string caffe_path = std::string(caffe_path_env);
+
+std::string prototxt = caffe_path + "/../models/neu_face/neu_face_deploy.prototxt";
+std::string caffemodel = caffe_path + "/../models/neu_face/finetune_neu_face.caffemodel";
 ProcessFace pf_(prototxt, caffemodel, 0, false);
 
 bool recognize_face(drv_msgs::face_recognize::Request  &req,

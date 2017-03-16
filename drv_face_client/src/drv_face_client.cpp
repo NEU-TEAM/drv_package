@@ -80,7 +80,7 @@ void drawText(Mat &img, vector<Rect> face_roi, vector<std_msgs::String> names)
 		for (size_t i = 0; i < names.size(); i++)
 				{
 						Scalar color = Scalar(0, 255, 0); // bgr order, don't miss 'Scalar'
-						putText(img, names[i].data, Point(face_roi[i].x + face_roi[i].width + 10, face_roi[i].y + face_roi[i].height - 10), 1, 1, color, 2);
+						putText(img, names[i].data, Point(face_roi[i].x + face_roi[i].width - 20, face_roi[i].y + face_roi[i].height - 20), 1, 1, color, 2);
 				}
 		faceSearchResult_ = true;
 }

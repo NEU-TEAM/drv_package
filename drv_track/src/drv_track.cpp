@@ -1,18 +1,20 @@
 #include <ros/ros.h>
 
-#include <math.h>
+#include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
+#include <image_transport/subscriber_filter.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/UInt16MultiArray.h>
 
-//Custom message
+//custom message
 #include <drv_msgs/recognized_target.h>
 
-#include <cv_bridge/cv_bridge.h>
-#include <image_transport/image_transport.h>
-#include <image_transport/subscriber_filter.h>
+//stl
+#include <cstdlib>
+#include <math.h>
 
 #include "goturn.h"
 
@@ -43,9 +45,12 @@ int modeTypeTemp_ = m_wander;
 string param_running_mode = "/status/running_mode";
 bool isInTracking_ = true;// cause the first call for tracking means have something to track
 
-// Initialize tracking class
-string test_proto = "/home/aicrobo/GOTURN/nets/tracker.prototxt";
-string caffe_model  = "/home/aicrobo/GOTURN/nets/models/pretrained_model/tracker.caffemodel";
+// Initialize tracking function class
+char* caffe_path_env = std::getenv("Caffe_DIR");
+std::string caffe_path = std::string(caffe_path_env);
+string test_proto = caffe_path + "/../models/GOTURN/tracker.prototxt";
+string caffe_model  = caffe_path + "/../models/GOTURN/tracker.caffemodel";
+
 int gpu_id = 0;
 const bool do_train = false;
 const bool show_output = false;

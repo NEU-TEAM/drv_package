@@ -37,7 +37,7 @@ void FaceDetector::detectAndDraw(Mat img_in, Mat &img_out, CascadeClassifier& ca
     equalizeHist( smallImg, smallImg );
 
     cascade.detectMultiScale(smallImg, faces, 1.05, 6, 0 | CV_HAAR_SCALE_IMAGE, Size(80, 80));
-    if( tryflip )
+    if(tryflip)
         {
             flip(smallImg, smallImg, 1);
             cascade.detectMultiScale(smallImg, faces2, 1.05, 6, 0 |CV_HAAR_SCALE_IMAGE, Size(80, 80) );
@@ -64,16 +64,18 @@ void FaceDetector::getFaceFromRoi(Mat img_in, vector<Rect> face_roi, vector<Mat>
     for (size_t i = 0; i < face_roi.size(); i++)
         {
             Rect square_roi;
-            trySquareRoi(img_in, face_roi[i], square_roi);
-            Mat face_temp = img_in(square_roi);
-            face_imgs.push_back(face_temp.clone());
+            if (trySquareRoi(img_in, face_roi[i], square_roi)) {
+                    Mat face_temp = img_in(square_roi);
+                    face_imgs.push_back(face_temp.clone());
+                }
         }
 }
 
-void FaceDetector::trySquareRoi(Mat img_in, Rect face_roi, Rect &square_roi)
+bool FaceDetector::trySquareRoi(Mat img_in, Rect face_roi, Rect &square_roi)
 {
     int w = face_roi.width;
     int h = face_roi.height;
+
     int margin = 20; // expand the roi
     if (w >= h)
         {
@@ -85,7 +87,7 @@ void FaceDetector::trySquareRoi(Mat img_in, Rect face_roi, Rect &square_roi)
                 {
                     square_roi.y = 0;
                 }
-            if (face_roi.y + h/2 + w/2 + margin <= img_in.rows)
+            if (face_roi.y + h/2 + w/2 + margin < img_in.rows)
                 {
                     square_roi.height = w + 2*margin;
                 }
@@ -106,9 +108,9 @@ void FaceDetector::trySquareRoi(Mat img_in, Rect face_roi, Rect &square_roi)
                 {
                     square_roi.x = 0;
                 }
-            if (face_roi.x + w/2 + h/2 + margin <= img_in.cols)
+            if (face_roi.x + w/2 + h/2 + margin < img_in.cols)
                 {
-                    square_roi.width = h + 2*margin;
+                    square_roi.width = h + 2 * margin;
                 }
             else
                 {
@@ -117,4 +119,8 @@ void FaceDetector::trySquareRoi(Mat img_in, Rect face_roi, Rect &square_roi)
             square_roi.y = face_roi.y;
             square_roi.height = h;
         }
+    if (square_roi.height + square_roi.y >= img_in.rows || square_roi.width + square_roi.x >= img_in.cols)
+        return false;
+    else
+        return true;
 }

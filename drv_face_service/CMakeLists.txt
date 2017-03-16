@@ -24,6 +24,8 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Boost COMPONENTS system filesystem regex REQUIRED)
 
 find_package(Caffe REQUIRED)
+message("Caffe DIR is ${Caffe_DIR}")
+# set(Caffe_INCLUDE_DIRS "/home/aicrobo/Downloads/caffe/cmake_build/include") this works!
 include_directories(${Caffe_INCLUDE_DIRS})
 add_definitions(${Caffe_DEFINITIONS})    # ex. -DCPU_ONLY
 

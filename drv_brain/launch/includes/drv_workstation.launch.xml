@@ -16,10 +16,6 @@
     <remap from="/vision_namespace" to="/$(arg vision_namespace_id)"/>
   </node>
 
-  <!-- initialize visualization -->
-  <param name="use_gui" value="true"/> 
-  <node name="rviz" pkg="rviz" type="rviz" >
-  </node>
 
   <!-- initialize recognition service -->
   <node name="drv_recognize" pkg="drv_recognize" type="drv_recognize.py" output="screen">
@@ -48,6 +44,11 @@
 
   <!-- initialize face recognition client -->
   <node name="drv_face_client" pkg="drv_face_client" type="drv_face_client" output="screen">
+  </node>
+
+  <!-- initialize visualization -->
+  <param name="use_gui" value="true"/> 
+  <node name="rviz" pkg="rviz" type="rviz" >
   </node>
 
 

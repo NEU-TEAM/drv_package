@@ -2,11 +2,6 @@
 
 # --------------------------------------------------------
 
-import sys
-
-# add this path to make sure we find caffe and faster_rcnn
-sys.path.append("/home/aicrobo/py-faster-rcnn/tools/")
-import _init_paths
 from fast_rcnn.config import cfg
 from fast_rcnn.test import im_detect
 from fast_rcnn.nms_wrapper import nms
@@ -23,7 +18,7 @@ CLASSES = ('__background__',
 
 def process(im):
     cfg.TEST.HAS_RPN = True  # Use RPN for proposals
-    prototxt = '/home/aicrobo/py-faster-rcnn/models/DRV/faster_rcnn_alt_opt/faster_rcnn_test.pt'
+    prototxt = '/home/aicrobo/py-faster-rcnn/models/DRV/faster_rcnn_test.pt'
     caffemodel = '/home/aicrobo/py-faster-rcnn/models/DRV/VGG16_faster_rcnn_final.caffemodel'
 
     use_gpu = True
