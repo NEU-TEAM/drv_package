@@ -46,4 +46,4 @@ To run searching and tracking modules smoothly, a workstation with at least 2GB 
 2. If you use astra camera and find the point cloud edge is not quite well, first make sure you get the official source code from <https://github.com/orbbec/ros_astra_camera.git>, clone it to your catkin_ws and try `catkin_make --pkg astra_camera -DFILTER=ON`.
 
 ## Authors
-DrawZeroPoint
+[DrawZeroPoint](https://github.com/DrawZeroPoint)
