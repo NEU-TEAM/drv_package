@@ -44,3 +44,6 @@ To run searching and tracking modules smoothly, a workstation with at least 2GB 
 ## 5. Trouble Shooting
 1. If custom message issue occurred when running catkin_make, run `catkin_make --pkg drv_msgs --force-cmake` first to make the msg header files needed, and then run `catkin_make`.
 2. If you use astra camera and find the point cloud edge is not quite well, first make sure you get the official source code from <https://github.com/orbbec/ros_astra_camera.git>, clone it to your catkin_ws and try `catkin_make --pkg astra_camera -DFILTER=ON`.
+
+## Authors
+DrawZeroPoint
