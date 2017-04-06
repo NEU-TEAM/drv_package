@@ -46,10 +46,10 @@ string param_running_mode = "/status/running_mode";
 bool isInTracking_ = true;// cause the first call for tracking means have something to track
 
 // Initialize tracking function class
-char* caffe_path_env = std::getenv("Caffe_DIR");
+char* caffe_path_env = std::getenv("Caffe_ROOT");
 std::string caffe_path = std::string(caffe_path_env);
-string test_proto = caffe_path + "/../models/GOTURN/tracker.prototxt";
-string caffe_model  = caffe_path + "/../models/GOTURN/tracker.caffemodel";
+string test_proto = caffe_path + "/models/GOTURN/tracker.prototxt";
+string caffe_model  = caffe_path + "/models/GOTURN/tracker.caffemodel";
 
 int gpu_id = 0;
 const bool do_train = false;

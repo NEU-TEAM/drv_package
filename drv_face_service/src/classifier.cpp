@@ -42,8 +42,6 @@ void Classifier::SetupNetwork(const string& deploy_proto,
 
     Blob<float>* input_layer = net_->input_blobs()[0];
 
-    printf("Network image size: %d, %d\n", input_layer->width(), input_layer->height());
-
     num_channels_ = input_layer->channels();
     CHECK(num_channels_ == 3 || num_channels_ == 1) << "Input layer should have 1 or 3 channels.";
     input_geometry_ = cv::Size(input_layer->width(), input_layer->height());
