@@ -11,6 +11,7 @@ To install original Caffe, refer <http://caffe.berkeleyvision.org/installation.h
 
 ### 1.3 py-faster-rcnn
 This package is not included in the drv_package, you need to get it from <https://github.com/rbgirshick/py-faster-rcnn>, and install it following official guide (basicly the same with installing Caffe using cmake). After that, you need pay attention to the lines in file `$DRV_PACKAGE/drv_recognize/scripts/process.py` which tell where can the prototxt and caffemodel of py-faster-rcnn be found. By default, we have *faster_rcnn_test.pt* in `$PY_FASTER_RCNN/models/DRV/` which is the same as the one in `$PY_FASTER_RCNN/models/pascal_voc/VGG16/faster_rcnn_alt_opt/`. Besides, we have *VGG16_faster_rcnn_final.caffemodel* in `$PY_FASTER_RCNN/model/DRV/` which you can obtain from [Caffe Model Zoo](https://github.com/BVLC/caffe/wiki/Model-Zoo) by executing `./data/scripts/fetch_imagenet_models.sh` in `$PY_FASTER_RCNN`.
+Install py-faster-rcnn need cudnn5.0 or above, before install py-faster-rcnn you should ensure cudnn edition ,you can git clone `https://github.com/donghongwen/py-faster-rcnn_cudnnv5.git`.and then make (you can install py-faster-rcnn with cmake)
 
 ### 1.4 rosserial
 Please refer [Arduino IDE Setup](http://wiki.ros.org/rosserial_arduino/Tutorials/Arduino%20IDE%20Setup) for using rosserial. To install it, we basicly only need to do `sudo apt-get install ros-indigo-rosserial-arduino` and `sudo apt-get install ros-indigo-rosserial` We use **rosserial_arduino** to communicate between one Arduino Uno board (may change to Mega 2560 in near future) and an ADXL345 3-axis accelerator. The Arduino controls 2 servos, one for pitching the RGBD-camera (ASUS Xtion Pro or ASTRA) and the other for rotating it. The accelerator measures the pitch and yaw angles of the camera. The .ino file loaded on the Arduino board is provided in folder `$DRV_DIR/supplements/arduino_control`, you can load it to your board with Arduino IDE <http://arduino.cc/en/Main/Software>.
@@ -49,4 +50,3 @@ To run searching and tracking modules smoothly, a workstation with at least 2GB 
 [DrawZeroPoint](https://github.com/DrawZeroPoint)
 
 
-## py-faster-rcnn
