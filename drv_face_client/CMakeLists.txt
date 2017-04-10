@@ -10,6 +10,7 @@ endif()
 
 find_package(OpenCV REQUIRED)
 
+
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   drv_msgs

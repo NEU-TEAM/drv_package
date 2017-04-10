@@ -23,6 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 set(OpenCV_DIR "/usr/share/OpenCV")
 find_package(OpenCV REQUIRED)
+message("Open CV version is ${OpenCV_VERSION}")
 
 find_package(PCL 1.7 REQUIRED)
 

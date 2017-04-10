@@ -29,6 +29,7 @@ message("Caffe DIR is ${Caffe_DIR}")
 include_directories(${Caffe_INCLUDE_DIRS})
 add_definitions(${Caffe_DEFINITIONS})    # ex. -DCPU_ONLY
 
+set(OpenCV_DIR "/usr/share/OpenCV")
 find_package(OpenCV REQUIRED )
 message("Open CV version is ${OpenCV_VERSION}")
 

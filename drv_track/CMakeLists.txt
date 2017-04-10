@@ -10,6 +10,14 @@ find_package(Caffe REQUIRED)
 include_directories(${Caffe_INCLUDE_DIRS})
 add_definitions(${Caffe_DEFINITIONS})    # ex. -DCPU_ONLY
 
+find_package(OpenCV REQUIRED
+  core
+  imgproc
+  highgui
+  objdetect
+  gpu
+)
+
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   drv_msgs
@@ -28,7 +36,6 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(Boost COMPONENTS system filesystem regex REQUIRED)
 
-find_package( OpenCV REQUIRED )
 message("Open CV version is ${OpenCV_VERSION}")
 
 if(CUDA_FOUND)
@@ -92,5 +99,5 @@ src/utilities.h
 # the node name can't be the same as the project name
  add_executable(drv_track_node src/drv_track.cpp)
 
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBS} ${Caffe_LIBRARIES} ${Boost_LIBRARIES} ${GLOG_LIB})
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${catkin_LIBRARIES} ${Caffe_LIBRARIES} ${Boost_LIBRARIES} ${GLOG_LIB})
 target_link_libraries (drv_track_node ${PROJECT_NAME})
