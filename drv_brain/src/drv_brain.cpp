@@ -252,7 +252,7 @@ int main(int argc, char **argv)
 		// initialize
 		resetStatus();
 
-		pubInfo("Deep Robot Vision system initialized!");
+		ROS_INFO("Deep Robot Vision system initialized!",msg.info.c_str());
 
 		while (ros::ok())
 				{
