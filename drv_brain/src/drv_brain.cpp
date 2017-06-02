@@ -118,7 +118,7 @@ void servoCallback(const std_msgs::UInt16MultiArrayConstPtr &msg)
     ros::param::set(param_servo_pitch, pitchAngle_);
     ros::param::set(param_servo_yaw, yawAngle_);
 }
-
+//pubServo(70, 90);
 void searchCallback(const std_msgs::Int8ConstPtr &msg)
 {
     if (modeType_ == m_search)
