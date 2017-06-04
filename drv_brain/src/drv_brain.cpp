@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include <ros/console.h>
+//#include <ros/console.h> //<ros/ros.h> contains the <ros/console.h> head file 
 
 #include <math.h>
 #include <sensor_msgs/Image.h>
@@ -11,8 +11,9 @@
 #include <std_msgs/UInt16MultiArray.h>
 #include <std_msgs/Int32MultiArray.h>
 
+
 //Custom message
-#include <drv_msgs/target_info.h>
+#include <drv_msgs/target_info.h>//how can it be created??? 
 
 #include <stdio.h>
 
