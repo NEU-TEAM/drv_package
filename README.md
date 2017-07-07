@@ -25,7 +25,7 @@ We use GOTURN as our object tracking backbone. GOTURN itself is not necessarily 
 We provide the face recognition function based on [VGG_Face](http://www.robots.ox.ac.uk/~vgg/software/vgg_face/). To perform face recognition, the caffe model (ex. *finetune_neu_face.caffemodel*) and prototext (ex. *neu_face_deploy.prototxt*) should in `$Caffe_ROOT/models/neu_face/`.
 
 ## 2 Hardware
-To run searching and tracking modules smoothly, a workstation with at least 2GB of GRAM is necessary. This program has been tested on multi-machine configurations, in which the host computer's CPUs run at frequencies exceeding 2.4 GHz. Low frequencies will lead to a delay in point cloud capturing and communication between the workstation and the host PC.
+To run searching and tracking modules smoothly, a workstation with at least 4GB of GRAM is necessary. This program has been tested on multi-machine configurations, in which the host computer's CPUs run at frequencies exceeding 2.8 GHz. Low frequencies will lead to a delay in point cloud capturing and communication between the workstation and the host PC.
 
 ## 3. Installation
 1. Clone this repository into catkin_ws/src:
