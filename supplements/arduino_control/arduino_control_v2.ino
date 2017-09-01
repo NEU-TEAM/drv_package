@@ -1,3 +1,16 @@
+/* Author: Dong Zhipeng 2017/9/1
+ *  This code is for NVG's Arduino Mega 2560 to connect and communicate with ROS 
+ *  as well as report angle data, control the servos and display status with leds.
+ *  
+ *  Connection map
+ *  Componts         Mega 2560
+ *  led_front   ->   digital 6
+ *  led_back    ->   digital 7
+ *  JY61(TX)    ->   digital 10
+ *  servo_pitch ->   digital 12
+ *  servo_yaw   ->   digital 13
+ */
+ 
 #include <ros.h>
 
 #if (ARDUINO >= 100)
@@ -18,7 +31,14 @@ ros::NodeHandle  nh;
 #include <Servo.h>
 
 #include <Wire.h>
+#include <SoftwareSerial.h>
 #include <JY901.h>
+SoftwareSerial mySerial(10, 11); // RX, TX
+// JY901   Arduino
+//  TX <---> 10
+float x_a = 0.0;
+float y_a = 0.0;
+float z_a = 0.0;
 
 #include "FastLED.h"
 #define NUM_LEDS 2
@@ -30,7 +50,9 @@ Servo p_sv; // for camera up and down
 Servo y_sv; // for head turn left and right
 
 std_msgs::Float32 pitch_msg;
+std_msgs::Float32 yaw_msg;
 ros::Publisher pub_pitch("camera_pitch", &pitch_msg);
+ros::Publisher pub_yaw("camera_yaw", &yaw_msg);
 
 void error_cb(const std_msgs::UInt16& msg) {
   error_flag = msg.data;
@@ -46,11 +68,17 @@ ros::Subscriber<std_msgs::UInt16MultiArray> sub_servo("servo", servo_cb);
 
 void setup() {
   Wire.begin();
-  Serial.begin(9600);
+  Serial.begin(57600); // JY61 only support this baud
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+
+  mySerial.begin(115200);
 
   FastLED.addLeds<NEOPIXEL, 6>(leds[0], 1); // front
   FastLED.addLeds<NEOPIXEL, 7>(leds[1], 1); // back
-  
+
+  nh.getHardware()->setBaud(57600); // refer https://answers.ros.org/question/206972/baud-rate-parameter-in-rosserial_python-arduino/
   nh.initNode();
   nh.advertise(pub_pitch);
   nh.subscribe(sub_error);
@@ -61,12 +89,19 @@ void setup() {
 }
 
 void loop() {
-  float x_a = (float)JY901.stcAngle.Angle[0]/32768*180;
-  float y_a = (float)JY901.stcAngle.Angle[1]/32768*180;
-  float z_a = (float)JY901.stcAngle.Angle[2]/32768*180;
+  while (mySerial.available()) 
+  {
+    JY901.CopeSerialData(mySerial.read()); //Call JY901 data cope function
+  }
+  x_a = (float)JY901.stcAngle.Angle[0]/32768*180;
+  y_a = (float)JY901.stcAngle.Angle[1]/32768*180;
+  z_a = (float)JY901.stcAngle.Angle[2]/32768*180;
+  
   pitch_msg.data = x_a;
+  yaw_msg.data = y_a;
   pub_pitch.publish(&pitch_msg);
-
+  pub_yaw.publish(&yaw_msg);
+  
   nh.spinOnce();
   delay(10);
 
