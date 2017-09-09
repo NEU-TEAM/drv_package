@@ -77,8 +77,9 @@ void configCallback(drv_tf::tfConfig &config, uint32_t level)
 {
 //    pitch_offset_ = config.camera_pitch_offset_cfg;
 //    dz_yaw_to_base_ = config.camera_to_base_height_cfg;
-    dx_yaw_to_base_ = config.camera_to_base_x_cfg;
-    dy_yaw_to_base_ = config.camera_to_base_y_cfg;
+    dx_yaw_to_base_ = config.base_to_root_x_cfg;
+    dy_yaw_to_base_ = config.base_to_root_y_cfg;
+    dz_yaw_to_base_ = config.base_to_root_z_cfg;
 }
 
 void servoCallback(const std_msgs::UInt16MultiArrayConstPtr &msg)
