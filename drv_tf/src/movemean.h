@@ -8,14 +8,14 @@ using namespace std;
 class MoveMean
 {
 public:
-    MoveMean(size_t q_size);
-    void getMoveMean(float in, float &out);
-
+  MoveMean(size_t q_size);
+  void getMoveMean(float in, float &out);
+  
 private:
-    size_t queueSize_;
-    queue<float> meanQ_;
-
-    void getMeanValue(float &out);
+  size_t queueSize_;
+  queue<float> meanQ_;
+  
+  void getMeanValue(float &out);
 };
 
 #endif // MOVEMEAN_H
