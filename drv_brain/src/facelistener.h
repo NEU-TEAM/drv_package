@@ -8,12 +8,12 @@ using namespace std;
 class FaceListener
 {
 public:
-    FaceListener();
-    void isNeedRecognizeFace();
-
+  FaceListener();
+  void isNeedRecognizeFace();
+  
 private:
-    string control_param_need_recog;
-    string local_param_need_recog;
+  string control_param_need_recog;
+  string local_param_need_recog;
 };
 
 #endif // FACELISTENER_H

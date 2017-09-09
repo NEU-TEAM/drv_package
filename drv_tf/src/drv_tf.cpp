@@ -24,7 +24,7 @@
 #include "movemean.h"
 
 //#define DEBUG_TRANS
-#define ASTRA
+//#define ASTRA
 
 // camera frame rotation about world frame
 float pitch_ = 0.0; // rotation angle -90 between camera optical frame and link is not included
@@ -174,10 +174,8 @@ int main(int argc, char** argv){
     ros::NodeHandle nh;
     ros::NodeHandle pnh("~");
 
-		// the first string is the variable name used by roslaunch, followed by variable value defined by roslaunch, and the default value
-		pnh.param("/drv_tf/base_link_frame_id", baseLinkFrameID_, baseLinkFrameID_);
-		pnh.param("/drv_tf/camera_frame_id", cameraOpticalFrameID_, cameraOpticalFrameID_);
-		pnh.param("/drv_tf/vision_namespace_id", visionNameSpaceID_, visionNameSpaceID_);
+    pnh.getParam("camera_optical_frame_id", cameraOpticalFrameID_);
+    pnh.getParam("root_frame_id", baseLinkFrameID_);
 
 		// set up dynamic reconfigure callback
 		dynamic_reconfigure::Server<drv_tf::tfConfig> server;
@@ -186,14 +184,14 @@ int main(int argc, char** argv){
 		f = boost::bind(&configCallback, _1, _2);
 		server.setCallback(f);
 
-		ros::Subscriber sub_yaw = nh.subscribe<std_msgs::UInt16MultiArray> (visionNameSpaceID_ + "/servo", 1, servoCallback);
-		ros::Subscriber sub_acc = nh.subscribe(visionNameSpaceID_ + "/camera_pitch", 1, imuCallback);
+		ros::Subscriber sub_yaw = nh.subscribe<std_msgs::UInt16MultiArray> ("servo", 1, servoCallback);
+		ros::Subscriber sub_acc = nh.subscribe("camera_pitch", 1, imuCallback);
 
 		ros::NodeHandle rgb_nh(nh, "rgb");
 		ros::NodeHandle rgb_pnh(pnh, "rgb");
 		image_transport::ImageTransport it_rgb_sub(rgb_nh);
 		image_transport::TransportHints hints_rgb("compressed", ros::TransportHints(), rgb_pnh);
-		image_transport::Subscriber sub_rgb = it_rgb_sub.subscribe("/rgb/image", 1, imageCallback, hints_rgb);
+		image_transport::Subscriber sub_rgb = it_rgb_sub.subscribe("rgb/image_rect_color", 1, imageCallback, hints_rgb);
 
 
     ROS_INFO("TF initialized.");

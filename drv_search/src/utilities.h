@@ -21,21 +21,21 @@
 class Utilities
 {
 public:
-    Utilities();
-
-    cv_bridge::CvImageConstPtr imagePtr_;
-    cv_bridge::CvImageConstPtr imageDepthPtr_;
-
+  Utilities();
+  
+  cv_bridge::CvImageConstPtr imagePtr_;
+  cv_bridge::CvImageConstPtr imageDepthPtr_;
+  
 private:
-    ros::NodeHandle nh_;
-    ros::NodeHandle pnh_;
-
-    image_transport::SubscriberFilter subImage_;
-    image_transport::SubscriberFilter subDepth_;
-    message_filters::Subscriber<sensor_msgs::CameraInfo> subCameraInfo_;
-
-    void imgCb(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::ImageConstPtr& imageDepth,
-                            const sensor_msgs::CameraInfoConstPtr& cameraInfo);
+  ros::NodeHandle nh_;
+  ros::NodeHandle pnh_;
+  
+  image_transport::SubscriberFilter subImage_;
+  image_transport::SubscriberFilter subDepth_;
+  message_filters::Subscriber<sensor_msgs::CameraInfo> subCameraInfo_;
+  
+  void imgCb(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::ImageConstPtr& imageDepth,
+             const sensor_msgs::CameraInfoConstPtr& cameraInfo);
 };
 
 #endif // UTILITIES_H

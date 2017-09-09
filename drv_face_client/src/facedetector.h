@@ -15,13 +15,16 @@ using namespace cv;
 class FaceDetector
 {
 public:
-    FaceDetector();
+    FaceDetector(string path);
     bool Process(Mat img_in, Mat &img_out, vector<Rect> &faceRoi, std::vector<Mat> &face_imgs);
 
 private:
-    void detectAndDraw(Mat img_in, Mat& img_out, CascadeClassifier& cascade, CascadeClassifier& nestedCascade, double scale, bool tryflip , vector<Rect> &face_roi);
+    void detectAndDraw(Mat img_in, Mat& img_out, double scale, bool tryflip, vector<Rect> &face_roi);
     void getFaceFromRoi(Mat img_in, vector<Rect> face_roi, vector<Mat> &face_imgs);
     bool trySquareRoi(Mat img_in, Rect face_roi, Rect &square_roi);
+
+    CascadeClassifier cascade_;
+    CascadeClassifier nestedCascade_;
 };
 
 #endif // FACEDETECTOR_H

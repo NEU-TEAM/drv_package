@@ -5,8 +5,8 @@ import rospy
 import cv2
 from drv_msgs.srv import *
 from sensor_msgs.msg import Image
-from std_msgs.msg import Empty
-from cv_bridge import CvBridge, CvBridgeError
+from cv_bridge import CvBridge
+
 
 def call_recognize(img_msg):
     rospy.wait_for_service('drv_recognize')
@@ -35,7 +35,7 @@ def image_callback(img_msg):
 
 def image_listener():
     rospy.init_node('recognize_client', anonymous=True)
-    rospy.Subscriber('/rgb/image', Image, image_callback, queue_size=1, buff_size=921600)
+    rospy.Subscriber('rgb/image_rect_color', Image, image_callback, queue_size=1, buff_size=921600)
 
     while not rospy.is_shutdown():
         rospy.spin()

@@ -17,16 +17,16 @@
 class Segment
 {
 public:
-    Segment();
-
-    void segment(cv_bridge::CvImageConstPtr imagePtr, cv_bridge::CvImageConstPtr depthPtr);
-    void cannyDetect(cv::Mat img_in, cv::Mat &img_out, int t1, int t2);
-
+  Segment();
+  
+  void segment(cv_bridge::CvImageConstPtr imagePtr, cv_bridge::CvImageConstPtr depthPtr);
+  void cannyDetect(cv::Mat img_in, cv::Mat &img_out, int t1, int t2);
+  
 private:
-    ros::NodeHandle nh_;
-    image_transport::ImageTransport it_;
-
-    image_transport::Publisher pubImage_;
+  ros::NodeHandle nh_;
+  image_transport::ImageTransport it_;
+  
+  image_transport::Publisher pubImage_;
 };
 
 #endif // SEGMENT_H
