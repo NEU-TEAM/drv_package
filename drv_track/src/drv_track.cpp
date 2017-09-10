@@ -171,7 +171,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image_msg)
 
     int x_ang = - deg_x + yaw_;
     int y_ang = - deg_y + pitch_;
-    if (x_ang >= 0 && x_ang <= 180 && y_ang > 50 && y_ang < 120)
+    if (x_ang >= 0 && x_ang <= 180 && y_ang > 0 && y_ang < 180)
     {
       isInTracking_ = true;
       delay_ = WAIT_LOOP;
@@ -183,7 +183,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image_msg)
     {
       isInTracking_ = false;
       ROS_WARN("Target out of range.\n");
-
       GO.tracker_initialized_ = false;
     }
   }
@@ -222,7 +221,7 @@ int main(int argc, char **argv)
   trackPubTarget_ = nh.advertise<drv_msgs::recognized_target>("track/recognized_target" , 1);
 
   ros::Subscriber sub_res = nh.subscribe<drv_msgs::recognized_target>("search/recognized_target", 1, resultCallback);
-  image_transport::Subscriber sub_rgb = it_rgb_sub.subscribe("rgb/image_rect_color", 1, imageCallback, hints_rgb);
+  image_transport::Subscriber sub_rgb = it_rgb_sub.subscribe("/vision/rgb/image_rect_color", 1, imageCallback, hints_rgb);
   ros::Subscriber sub_s = nh.subscribe<std_msgs::UInt16MultiArray>("servo", 1, servoCallback);
 
   if (ros::param::has(param_servo_pitch))

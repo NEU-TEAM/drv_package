@@ -274,7 +274,9 @@ bool GetSourceCloud::getPoint(cv::Mat color, cv::Mat depth, int row, int col, fl
   }
   
   point = pointFromDepthRGB(color, depth, row, col, cx, cy, fx, fy, maxDepth, minDepth);
-  if (point.x == std::numeric_limits<float>::quiet_NaN())
+  if (point.x == std::numeric_limits<float>::quiet_NaN() ||
+      point.y == std::numeric_limits<float>::quiet_NaN() ||
+      point.z == std::numeric_limits<float>::quiet_NaN() )
     return false;
   else
     return true;

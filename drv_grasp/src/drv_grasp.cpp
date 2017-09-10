@@ -81,10 +81,10 @@ pcl::PointIndices::Ptr inliers_(new pcl::PointIndices);
 uint32_t shape = visualization_msgs::Marker::ARROW;
 
 // transform frame
-string root_frame_ = "/camera_yaw_frame"; // Root frame that NVG link to
+string root_frame_ = "base_link"; // Root frame that NVG link to
 //string camera_base_frame_ = "camera_yaw_frame";
-string camera_optical_frame_ = "/openni_rgb_optical_frame";
-string target_location_frame_ = "/map";
+string camera_optical_frame_ = "vision_rgb_optical_frame";
+string map_frame_ = "/map";
 geometry_msgs::TransformStamped trans_c_;
 geometry_msgs::TransformStamped trans_m_;
 
@@ -96,7 +96,7 @@ float fy_ = 540.23;
 float cx_ = 314.76;
 float cy_ = 239.95;
 
-double min_depth_ = 0.5;
+double min_depth_ = 0.3;
 double max_depth_ = 2.5;
 
 
@@ -246,20 +246,17 @@ void depthCallback(
 #endif
 
   MakePlan MP;
-  pcl::PointXYZRGB graspPt; // in robot's frame
-  pcl::PointXYZRGB locationPt; // in map frame
-
-  pcl::PointXYZRGB p_in; // use image to get p_in
+  pcl::PointXYZRGB graspPt; // in robot's camera optical frame
+  pcl::PointXYZRGB opticalPt; // target location in camera's optical frame
 
   if (GetSourceCloud::getPoint(imagePtr->image, imageDepthPtr->image, row_, col_,
-                               fx_, fy_, cx_, cy_, max_depth_, min_depth_, p_in))
+                               fx_, fy_, cx_, cy_, max_depth_, min_depth_, opticalPt))
   {
-    if (isnan(p_in.x) || isnan(p_in.y) || isnan(p_in.z))
+    if (isnan(opticalPt.x) || isnan(opticalPt.y) || isnan(opticalPt.z))
       hasGraspPlan_ = false;
     else
     {
-      doTransform(p_in, graspPt, trans_c_);
-      // doTransform(p_in, locationPt, trans_m_);
+      doTransform(opticalPt, graspPt, trans_c_);
       MP.smartOffset(graspPt, 0.02);
       hasGraspPlan_ = true;
     }
@@ -337,12 +334,12 @@ void depthCallback(
     }
     else
     {
-      ROS_WARN_THROTTLE(5, "Failed to generate grasp plan.\n");
+      ROS_WARN("Some coordinate values are NaN (Inner Loop).\n");
     }
   }
   else
   {
-    ROS_ERROR("Get point failed!\n");
+    ROS_ERROR("Some coordinate values are NaN (Outer Loop).\n");
   }
 }
 
@@ -386,8 +383,8 @@ int main(int argc, char **argv)
   image_transport::TransportHints hintsRgb("compressed", ros::TransportHints(), rgb_pnh);
   image_transport::TransportHints hintsDepth("compressedDepth", ros::TransportHints(), depth_pnh);
 
-  imageSub_.subscribe(rgb_it, rgb_nh.resolveName("image_rect_color"), 1, hintsRgb);
-  imageDepthSub_.subscribe(depth_it, depth_nh.resolveName("image_rect"), 1, hintsDepth);
+  imageSub_.subscribe(rgb_it, rgb_nh.resolveName("/vision/rgb/image_rect_color"), 1, hintsRgb);
+  imageDepthSub_.subscribe(depth_it, depth_nh.resolveName("/vision/depth/image_rect"), 1, hintsDepth);
   cameraInfoSub_.subscribe(rgb_nh, "camera_info", 1);
 
   approxSyncDepth_ = new message_filters::Synchronizer<MyApproxSyncDepthPolicy>(
@@ -407,7 +404,7 @@ int main(int argc, char **argv)
       modeType_ = modeTypeTemp_;
     }
 
-    if (tfBufferM_._frameExists(target_location_frame_))
+    if (tfBufferM_._frameExists(map_frame_))
       mapFrameExist_ = true;
     else
       mapFrameExist_ = false;
@@ -422,8 +419,6 @@ int main(int argc, char **argv)
     {
       // the first frame is the target frame
       trans_c_ = tfBufferC_.lookupTransform(root_frame_, camera_optical_frame_, ros::Time(0));
-      // if (mapFrameExist_)
-      //   trans_m_ = tfBufferM_.lookupTransform(target_location_frame_, camera_optical_frame_, ros::Time(0));
     }
     catch (tf2::TransformException &ex)
     {
