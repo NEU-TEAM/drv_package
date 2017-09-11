@@ -6,21 +6,22 @@
   <arg name="base_link_frame" default="/base_link"/>
 
   <!-- camera optical frame -->
-  <arg name="camera_optical_frame" default="/$(arg vision_namespace)_rgb_optical_frame"/>
+  <arg name="camera_link_frame" default="/$(arg vision_namespace)_link"/>
 
   <!-- broadcast transform among frames -->
   <node ns="$(arg vision_namespace)" name="drv_tf" pkg="drv_tf" type="drv_tf" output="screen">
-    <param name="camera_optical_frame_id" value="$(arg camera_optical_frame)" />
+    <param name="camera_link_frame_id" value="$(arg camera_link_frame)" />
     <param name="root_frame_id" value="$(arg base_link_frame)" />
 
-    <param name="pitch_offset_value" value="90.0" />
+    <param name="pitch_offset_value" value="93.0" />
 
+    <!-- structure param for NVG 1.0 OpenNI2 camera -->
     <param name="dx_camera_to_pitch_value" value="0.0" />
-    <param name="dy_camera_to_pitch_value" value="0.03" />
-    <param name="dz_camera_to_pitch_value" value="0.0" />
-    <param name="dx_pitch_to_yaw_value" value="0.01" />
-    <param name="dy_pitch_to_yaw_value" value="0.01" />
-    <param name="dz_pitch_to_yaw_value" value="0.01" />
+    <param name="dy_camera_to_pitch_value" value="0.00375" />
+    <param name="dz_camera_to_pitch_value" value="0.027" />
+    <param name="dx_pitch_to_yaw_value" value="0.019" />
+    <param name="dy_pitch_to_yaw_value" value="0.0" />
+    <param name="dz_pitch_to_yaw_value" value="0.0773" />
   </node>
 
 
@@ -42,6 +43,7 @@
 
   <!-- initialize grasp planning function -->
   <node ns="$(arg vision_namespace)" name="drv_grasp" pkg="drv_grasp" type="drv_grasp" output="screen">
+    <!-- No slash on the front -->
     <param name="root_frame_id" value="$(arg base_link_frame)" />
     <param name="camera_optical_frame_id" value="$(arg vision_namespace)_rgb_optical_frame" />
   </node>

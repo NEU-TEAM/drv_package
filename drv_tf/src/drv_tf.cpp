@@ -32,23 +32,13 @@ float yaw_ = 0.0;
 
 
 // distance between frame orign, in meter
-#ifdef ASTRA // use astra s
-float dx_optic_to_link = 0.02;
-float dy_optic_to_link = 0.01025;
-float dz_optic_to_link = 0.035;
-#else // use xtion
-float dx_optic_to_link = 0;
-float dy_optic_to_link = 0.01;
-float dz_optic_to_link = 0.02;
-#endif
-
-float dx_link_to_pitch = 0;
+float dx_camera_to_pitch = 0;
 #ifdef ASTRA
 float dy_link_to_pitch = 0.0125;
 #else
-float dy_link_to_pitch = 0.00375;
+float dy_camera_to_pitch = 0.00375;
 #endif
-float dz_link_to_pitch = 0.027;
+float dz_camera_to_pitch = 0.027;
 
 float dx_pitch_to_yaw = 0.019;
 float dy_pitch_to_yaw = 0;
@@ -64,19 +54,16 @@ float pitch_offset_ = 93; // offset for pitch which was got from IMU
 int servoPitch_ = 0; // judge if the servo pitch value is changing
 
 // roslaunch param
-std::string cameraLinkFrameID_ = "/vision_link";
-std::string cameraPitchFrameID_ = "/camera_pitch_frame"; // y along the axis of pitch servo to the right, x toward front, z up, orign projection at the diameter of rotation plate
-std::string cameraYawFrameID_ = "/camera_yaw_frame"; // y to the right, x to the front, z up, orign at the bottom of support
-std::string baseLinkFrameID_ = "/base_link";
-std::string cameraOpticalFrameID_ = "/openni_rgb_optical_frame";
-std::string visionNameSpaceID_ = "/vision";
+std::string cameraLinkFrame_ = "/vision_link";
+std::string cameraPitchFrame_ = "/camera_pitch_frame"; // y along the axis of pitch servo to the right, x toward front, z up, orign projection at the diameter of rotation plate
+std::string cameraYawFrame_ = "/camera_yaw_frame"; // y to the right, x to the front, z up, orign at the bottom of support
+std::string baseLinkFrame_ = "/base_link";
 
 MoveMean mm(50); // the value indicate the strengh to stable the camera.
 
 void configCallback(drv_tf::tfConfig &config, uint32_t level)
 {
-//    pitch_offset_ = config.camera_pitch_offset_cfg;
-//    dz_yaw_to_base_ = config.camera_to_base_height_cfg;
+    pitch_offset_ = config.camera_pitch_offset_cfg;
     dx_yaw_to_base_ = config.base_to_root_x_cfg;
     dy_yaw_to_base_ = config.base_to_root_y_cfg;
     dz_yaw_to_base_ = config.base_to_root_z_cfg;
@@ -99,30 +86,14 @@ void imuCallback(const std_msgs::Float32ConstPtr & msg)
 
 void imageCallback(const sensor_msgs::ImageConstPtr &image_msg)
 {
-//		static tf2_ros::TransformBroadcaster br_optic_to_link;
-//		geometry_msgs::TransformStamped transformStamped1;
-//		image_msg->header.stamp = image_msg->header.stamp;
-//		transformStamped1.header.frame_id = cameraLinkFrameID_;
-//		transformStamped1.child_frame_id = cameraOpticalFrameID_;
-//		transformStamped1.transform.translation.x = dx_optic_to_link;
-//		transformStamped1.transform.translation.y = dy_optic_to_link;
-//		transformStamped1.transform.translation.z = dz_optic_to_link;
-//		tf2::Quaternion q;
-//		q.setRPY(3*M_PI_2 , 0, 3*M_PI_2);
-//		transformStamped1.transform.rotation.x = q.x();
-//		transformStamped1.transform.rotation.y = q.y();
-//		transformStamped1.transform.rotation.z = q.z();
-//		transformStamped1.transform.rotation.w = q.w();
-//		br_optic_to_link.sendTransform(transformStamped1);
-
     static tf2_ros::TransformBroadcaster br_link_to_pitch;
     geometry_msgs::TransformStamped transformStamped2;
     transformStamped2.header.stamp = image_msg->header.stamp;
-    transformStamped2.header.frame_id = cameraPitchFrameID_;
-    transformStamped2.child_frame_id = cameraLinkFrameID_;
-    transformStamped2.transform.translation.x = dx_link_to_pitch;
-    transformStamped2.transform.translation.y = dy_link_to_pitch;
-    transformStamped2.transform.translation.z = dz_link_to_pitch;
+    transformStamped2.header.frame_id = cameraPitchFrame_;
+    transformStamped2.child_frame_id = cameraLinkFrame_;
+    transformStamped2.transform.translation.x = dx_camera_to_pitch;
+    transformStamped2.transform.translation.y = dy_camera_to_pitch;
+    transformStamped2.transform.translation.z = dz_camera_to_pitch;
     tf2::Quaternion q2;
     q2.setRPY(0 , pitch_, 0);
     q2.setY(- q2.y());
@@ -135,8 +106,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr &image_msg)
     static tf2_ros::TransformBroadcaster br_pitch_to_yaw;
     geometry_msgs::TransformStamped transformStamped3;
     transformStamped3.header.stamp = image_msg->header.stamp;
-    transformStamped3.header.frame_id = cameraYawFrameID_;
-    transformStamped3.child_frame_id = cameraPitchFrameID_;
+    transformStamped3.header.frame_id = cameraYawFrame_;
+    transformStamped3.child_frame_id = cameraPitchFrame_;
     transformStamped3.transform.translation.x = dx_pitch_to_yaw;
     transformStamped3.transform.translation.y = dy_pitch_to_yaw;
     transformStamped3.transform.translation.z = dz_pitch_to_yaw;
@@ -154,9 +125,9 @@ void imageCallback(const sensor_msgs::ImageConstPtr &image_msg)
 #ifdef DEBUG_TRANS
     transformStamped4.header.frame_id = "/map";
 #else
-    transformStamped4.header.frame_id = baseLinkFrameID_;
+    transformStamped4.header.frame_id = baseLinkFrame_;
 #endif
-    transformStamped4.child_frame_id = cameraYawFrameID_;
+    transformStamped4.child_frame_id = cameraYawFrame_;
     transformStamped4.transform.translation.x = dx_yaw_to_base_;
     transformStamped4.transform.translation.y = dy_yaw_to_base_;
     transformStamped4.transform.translation.z = dz_yaw_to_base_;
@@ -175,8 +146,17 @@ int main(int argc, char** argv){
     ros::NodeHandle nh;
     ros::NodeHandle pnh("~");
 
-    pnh.getParam("camera_optical_frame_id", cameraOpticalFrameID_);
-    pnh.getParam("root_frame_id", baseLinkFrameID_);
+    pnh.getParam("root_frame_id", baseLinkFrame_);
+    pnh.getParam("camera_frame_id", cameraLinkFrame_);
+    pnh.getParam("pitch_offset_value", pitch_offset_);
+    
+    // get structure params, up to down
+    pnh.getParam("dx_camera_to_pitch_value", dx_camera_to_pitch);
+    pnh.getParam("dy_camera_to_pitch_value", dy_camera_to_pitch);
+    pnh.getParam("dz_camera_to_pitch_value", dz_camera_to_pitch);
+    pnh.getParam("dx_pitch_to_yaw_value", dx_pitch_to_yaw);
+    pnh.getParam("dy_pitch_to_yaw_value", dy_pitch_to_yaw);
+    pnh.getParam("dz_pitch_to_yaw_value", dz_pitch_to_yaw);
 
 		// set up dynamic reconfigure callback
 		dynamic_reconfigure::Server<drv_tf::tfConfig> server;

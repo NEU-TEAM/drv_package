@@ -6,7 +6,7 @@
   <include file="$(find drv_brain)/launch/includes/drv_host.launch.xml">
     <arg name="vision_namespace" value="$(arg ns)"/>
     <arg name="usb_port_num" value="$(arg port)"/>
-    <arg name="camera_type" value="openni2"/>
+    <arg name="use_openni2" value="true"/>
   </include>
 
 </launch>

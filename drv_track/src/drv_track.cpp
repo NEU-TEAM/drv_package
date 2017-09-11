@@ -182,7 +182,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image_msg)
     else
     {
       isInTracking_ = false;
-      ROS_WARN("Target out of range.\n");
+      ROS_WARN("Tracking target out of range.\n");
       GO.tracker_initialized_ = false;
     }
   }

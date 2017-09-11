@@ -84,7 +84,7 @@ uint32_t shape = visualization_msgs::Marker::ARROW;
 string root_frame_ = "base_link"; // Root frame that NVG link to
 //string camera_base_frame_ = "camera_yaw_frame";
 string camera_optical_frame_ = "vision_rgb_optical_frame";
-string map_frame_ = "/map";
+string map_frame_ = "map";
 geometry_msgs::TransformStamped trans_c_;
 geometry_msgs::TransformStamped trans_m_;
 
@@ -97,7 +97,7 @@ float cx_ = 314.76;
 float cy_ = 239.95;
 
 double min_depth_ = 0.3;
-double max_depth_ = 2.5;
+double max_depth_ = 3.0;
 
 
 void getCloudByInliers(PointCloud::Ptr cloud_in, PointCloud::Ptr &cloud_out,
