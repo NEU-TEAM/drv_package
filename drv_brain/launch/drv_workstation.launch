@@ -1,7 +1,7 @@
 <launch>
   
   <arg name="ns" default="vision"/>
-  <arg name="base_link" default="/base_link"/>
+  <arg name="base_link" default="base_link"/>
 
   <include file="$(find drv_brain)/launch/includes/drv_workstation.launch.xml">
     <arg name="vision_namespace" value="$(arg ns)"/>

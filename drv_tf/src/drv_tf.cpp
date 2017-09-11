@@ -147,6 +147,7 @@ int main(int argc, char** argv){
     ros::NodeHandle pnh("~");
 
     pnh.getParam("root_frame_id", baseLinkFrame_);
+    ROS_ERROR(baseLinkFrame_.c_str());
     pnh.getParam("camera_frame_id", cameraLinkFrame_);
     pnh.getParam("pitch_offset_value", pitch_offset_);
     

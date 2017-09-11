@@ -3,10 +3,12 @@
   <arg name="vision_namespace" default="vision"/>
 
   <!-- vision system referance frame on the robot -->
-  <arg name="base_link_frame" default="/base_link"/>
+  <!-- !!No slash on the front of frame arguments in any circumstence -->
+  <arg name="base_link_frame" default="base_link"/>
 
   <!-- camera optical frame -->
-  <arg name="camera_link_frame" default="/$(arg vision_namespace)_link"/>
+  <!-- No slash on the front of this arg, add / if necessary-->
+  <arg name="camera_link_frame" default="$(arg vision_namespace)_link"/>
 
   <!-- broadcast transform among frames -->
   <node ns="$(arg vision_namespace)" name="drv_tf" pkg="drv_tf" type="drv_tf" output="screen">
@@ -23,7 +25,6 @@
     <param name="dy_pitch_to_yaw_value" value="0.0" />
     <param name="dz_pitch_to_yaw_value" value="0.0773" />
   </node>
-
 
   <!-- initialize recognition service -->
   <node ns="$(arg vision_namespace)" name="drv_recognize" pkg="drv_recognize" type="drv_recognize.py" output="screen">
@@ -43,7 +44,6 @@
 
   <!-- initialize grasp planning function -->
   <node ns="$(arg vision_namespace)" name="drv_grasp" pkg="drv_grasp" type="drv_grasp" output="screen">
-    <!-- No slash on the front -->
     <param name="root_frame_id" value="$(arg base_link_frame)" />
     <param name="camera_optical_frame_id" value="$(arg vision_namespace)_rgb_optical_frame" />
   </node>
@@ -61,6 +61,7 @@
   <param name="use_gui" value="true"/> 
   <node name="rviz" pkg="rviz" type="rviz" >
   </node>
+
 
 
 </launch>
