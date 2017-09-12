@@ -28,7 +28,7 @@ ros::NodeHandle  nh;
 
 /* Servo control */
 #include <VarSpeedServo.h>
-const int servo_speed = 50; // 0-255
+const int servo_speed = 30; // 0-255
 VarSpeedServo p_sv;
 VarSpeedServo y_sv;
 
@@ -92,13 +92,12 @@ void setup() {
   Serial1.begin(115200); // 18 TX, 19 RX
 
   nh.getHardware()->setBaud(57600);
-  nh.initNode();
   nh.advertise(pub_pitch);
   nh.subscribe(sub_servo);
   
   p_sv.attach(2, 500, 2500);
   y_sv.attach(3, 500, 2500);
-  p_sv.write(70, servo_speed, true); // set the intial position of the servo
+  p_sv.write(90, servo_speed, false); // set the intial position of the servo
   y_sv.write(90, servo_speed, true); 
 
   while (Serial1.available()) 
@@ -125,4 +124,3 @@ void loop() {
   nh.spinOnce();
   delay(50);
 }
-
