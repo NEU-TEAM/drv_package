@@ -32,8 +32,14 @@ ros::Publisher pub_pitch("camera_pitch", &pitch_msg);
 
 void servo_cb( const std_msgs::UInt16MultiArray&  cmd_msg)
 {
-  servo1.write(cmd_msg.data[0]); //0-180
-  servo2.write(cmd_msg.data[1]); 
+  int p_v = cmd_msg.data[0];
+  int y_v = cmd_msg.data[1];
+  if (p_v < 1) p_v = 1;
+  if (p_v > 179) p_v = 179;
+  if (y_v < 1) y_v = 1;
+  if (y_v > 179) y_v = 179;
+  servo1.write(p_v); //0-180
+  servo2.write(y_v); 
 }
 
 ros::Subscriber<std_msgs::UInt16MultiArray> sub("servo", servo_cb);
@@ -51,8 +57,8 @@ void setup() {
   nh.advertise(pub_pitch);
   nh.subscribe(sub);
   
-  servo1.attach(12);
-  servo2.attach(13);
+  servo1.attach(12, 500, 2500);
+  servo2.attach(13, 500, 2500);
 }
 
 void loop() {
@@ -68,7 +74,7 @@ void loop() {
   pub_pitch.publish(&pitch_msg);
   
   nh.spinOnce();
-  delay(10);
+  delay(50);
 }
 
 void writeTo(int device, byte address, byte val) {

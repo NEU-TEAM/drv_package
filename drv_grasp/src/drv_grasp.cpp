@@ -322,6 +322,9 @@ void depthCallback(
     grasp_ps.pose.orientation.y = -sqrt(0.5);
     grasp_ps.pose.orientation.z = 0;
     graspPubPose_.publish(grasp_ps);
+    
+    // Publish pose only once
+    ros::param::set(param_running_mode, m_wander);
   }
   else
   {
@@ -354,7 +357,7 @@ int main(int argc, char **argv)
   ros::Subscriber sub_track = nh.subscribe<drv_msgs::recognized_target>("track/recognized_target", 1, trackResultCallback);
   
   // sub images to get point coordinate
-  int queueSize = 3;
+  int queueSize = 1;
   image_transport::SubscriberFilter imageSub_;
   image_transport::SubscriberFilter imageDepthSub_;
   message_filters::Subscriber<sensor_msgs::CameraInfo> cameraInfoSub_;

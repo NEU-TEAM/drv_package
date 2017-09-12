@@ -19,8 +19,8 @@
 
     <!-- structure param for NVG 1.0 OpenNI2 camera -->
     <param name="dx_camera_to_pitch_value" value="0.0" />
-    <param name="dy_camera_to_pitch_value" value="0.00375" />
-    <param name="dz_camera_to_pitch_value" value="0.027" />
+    <param name="dy_camera_to_pitch_value" value="0.05875" />
+    <param name="dz_camera_to_pitch_value" value="0.047" />
     <param name="dx_pitch_to_yaw_value" value="0.019" />
     <param name="dy_pitch_to_yaw_value" value="0.0" />
     <param name="dz_pitch_to_yaw_value" value="0.0773" />
@@ -35,7 +35,7 @@
   </node>
 
   <!-- initialize search client -->
-  <node ns="$(arg vision_namespace)" name="drv_search" pkg="drv_search" type="drv_search" output="screen">
+  <node ns="$(arg vision_namespace)" name="drv_search" pkg="drv_search" type="drv_search">
   </node>
 
   <!-- initialize tracking function -->
@@ -59,7 +59,7 @@
 
   <!-- initialize visualization -->
   <param name="use_gui" value="true"/> 
-  <node name="rviz" pkg="rviz" type="rviz" >
+  <node ns="$(arg vision_namespace)" name="rviz" pkg="rviz" type="rviz" >
   </node>
 
 

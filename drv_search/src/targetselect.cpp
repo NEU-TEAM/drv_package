@@ -101,17 +101,17 @@ void TargetSelect::paintTarget(cv::Mat &img, int id, int fc, std::vector<std_msg
   
   circle(img, Point(x,y), 12, color, 2);
   if(y - 25 > 0)
-    line(img, Point(x,y), Point(x,y - 25), color, 2);
+    line(img, Point(x,y), Point(x, y - 25), color, 2);
   else line(img, Point(x,y), Point(x, 0), color, 2);
   if(y + 25 < 480)
     line(img, Point(x, y), Point(x, y + 25), color, 2);
-  else line(img, Point(x, y), Point(x, 480), color, 2);
+  else line(img, Point(x, y), Point(x, 479), color, 2);
   if(x - 25 > 0)
-    line(img, Point(x, y), Point(x - 25,y), color, 2);
+    line(img, Point(x, y), Point(x - 25, y), color, 2);
   else line(img, Point(x, y), Point(0, y), color, 2);
   if(x + 25 < 640)
-    line(img, Point(x,y), Point(x + 25,y), color, 2);
-  else line(img, Point(x,y), Point(640, y), color, 2);
+    line(img, Point(x,y), Point(x + 25, y), color, 2);
+  else line(img, Point(x, y), Point(639, y), color, 2);
   
   putText(img, intToString(fc), Point(x + 10, y - 10), 1, 2, color, 2);
 }
