@@ -49,7 +49,7 @@ double dy_yaw_to_base_ = 0.0;
 double dz_yaw_to_base_ = 1.002;
 
 
-float pitch_offset_ = 93; // offset for pitch which was got from IMU
+float pitch_offset_ = 90; // offset for pitch which was got from IMU
 
 int servoPitch_ = 0; // judge if the servo pitch value is changing
 

@@ -98,6 +98,8 @@ void setup() {
   
   p_sv.attach(2, 500, 2500);
   y_sv.attach(3, 500, 2500);
+  p_sv.write(70, servo_speed, true); // set the intial position of the servo
+  y_sv.write(90, servo_speed, true); 
 
   while (Serial1.available()) 
   {
