@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include <ros/console.h>
+//#include <ros/console.h> //<ros/ros.h> contains the <ros/console.h> head file 
 
 #include <math.h>
 #include <sensor_msgs/Image.h>
@@ -11,8 +11,9 @@
 #include <std_msgs/UInt16MultiArray.h>
 #include <std_msgs/Int32MultiArray.h>
 
+
 //Custom message
-#include <drv_msgs/target_info.h>
+#include <drv_msgs/target_info.h>//how can it be created??? 
 
 #include <stdio.h>
 
@@ -118,7 +119,7 @@ void servoCallback(const std_msgs::UInt16MultiArrayConstPtr &msg)
   ros::param::set(param_servo_pitch, pitchAngle_);
   ros::param::set(param_servo_yaw, yawAngle_);
 }
-
+//pubServo(70, 90);
 void searchCallback(const std_msgs::Int8ConstPtr &msg)
 {
   if (modeType_ == m_search)
